@@ -19,14 +19,13 @@ public class WebCrawlingService {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
     private static final int TIMEOUT = 10000;
 
-    public String lotteCrawler() throws IOException {
-        List<Product> products = new ArrayList<>();
-        String lotteUrl = "https://www.lotteon.com/csearch/render/category?render=nqapi&platform=pc&collection_id=9&login=Y&u9=navigate&u8=FC01220406&mallId=1";
-        Document doc = Jsoup.connect(lotteUrl)
+    public List<Product> lotteCrawler(String lotteUrl) throws IOException {
+    List<Product> products = new ArrayList<>();
+        String url = lotteUrl;
+        Document doc = Jsoup.connect(url)
                 .userAgent(USER_AGENT)
                 .timeout(TIMEOUT)
                 .get();
-        // log.debug("{}", doc.body().html());
 
         ArrayNode initial = InitialDataUtil.findInitialData(doc);
         if (initial == null) {
@@ -34,6 +33,7 @@ public class WebCrawlingService {
         } else {
             log.debug("initialData size= {}", initial.size());
             for (int i = 0; i < initial.size(); i++) {
+                Product product = new Product();
                 JsonNode o = initial.get(i);
                 String name  = o.path("productName").asText(o.path("spdNm").asText(null));
                 String detailLink  = o.path("productLink").asText(null);
@@ -64,13 +64,19 @@ public class WebCrawlingService {
                     if (o.has("discountPrice")) price = o.get("discountPrice").asInt();
                     else if (o.has("price"))    price = o.get("price").asInt();
                 }
-                log.debug("name={}, brand={}, price={}, detailLink={}, category={}, imgLink={}, market= {}", name, brand, price, detailLink,category,imgLink,market);
-                // 필요한 경우 products 리스트에 담을 수 있음
-                // products.add(new Product(name, link, brand, price));
+
+                //상품정보 정의
+                product.setProductName(name);
+                product.setPrice(price);
+                product.setCategory(category);
+                product.setDetailLink(detailLink);
+                product.setImageUrl(imgLink);
+                product.setMarket(market);
+                products.add(product);
             }
         }
 
-        return null;
+        return products;
     }
 
 }
