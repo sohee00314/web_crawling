@@ -15,6 +15,6 @@ public class CrawlingController {
     @GetMapping("/test")
     public String test()throws IOException {
         webCrawlingService.lotteCrawler();
-        return "ok";
+        return  "ok";
     }
 }
