@@ -1,10 +1,7 @@
 package com.sinse.javawebcrawling.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,11 +20,13 @@ public class SimpleCrawlerService {
             driver = new ChromeDriver();
             driver.get(url);
 
+
             while (true) {
                 try {
-                    WebElement next= driver.findElement(By.className("srchPaginationActive"));
-                    next.click();
-                    Thread.sleep(10000);
+                    WebElement next= driver.findElement(By.cssSelector("div.srchPagination a.srchPaginationNext"));
+//                    next.click();
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", next);
+                    Thread.sleep(1000);
                 } catch (NoSuchElementException e) {
                     log.debug("마지막 페이지");
                     break;
