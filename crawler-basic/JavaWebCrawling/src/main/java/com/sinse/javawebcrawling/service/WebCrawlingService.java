@@ -26,6 +26,7 @@ public class WebCrawlingService {
                 .userAgent(USER_AGENT)
                 .timeout(TIMEOUT)
                 .get();
+        log.debug(doc.body().html());
 
         ArrayNode initial = InitialDataUtil.findInitialData(doc);
         if (initial == null) {
@@ -39,7 +40,8 @@ public class WebCrawlingService {
                 String detailLink  = o.path("productLink").asText(null);
                 String imgLink  = o.path("productImage").asText(null);
                 String market = o.path("storeName").asText(null);
-                String brand = o.path("brandName").asText(o.path("brand").asText(null));
+                String spdNo =  o.path("spdNo").asText(null);
+                String sitmNo= o.path("sitmNo").asText(null);
                 Integer price = null;
                 String category =
                         o.path("categoryName").asText(null); // 1순위: 최상위에 있으면 사용
@@ -73,6 +75,8 @@ public class WebCrawlingService {
                 product.setImageUrl(imgLink);
                 product.setMarket(market);
                 products.add(product);
+
+                log.debug("spdNo = {} sitmNo= {}", spdNo, sitmNo);
             }
         }
 
