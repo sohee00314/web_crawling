@@ -22,10 +22,19 @@ public class WebCrawlingService {
     public List<Product> lotteCrawler(String lotteUrl) throws IOException {
     List<Product> products = new ArrayList<>();
         String url = lotteUrl;
-        Document doc = Jsoup.connect(url)
-                .userAgent(USER_AGENT)
-                .timeout(TIMEOUT)
-                .get();
+        Document doc;
+        if (lotteUrl != null && (lotteUrl.startsWith("http://") || lotteUrl.startsWith("https://"))){
+            log.info("Url로 판단하여 파싱 시도");
+            doc = Jsoup.connect(url)
+                    .userAgent(USER_AGENT)
+                    .timeout(TIMEOUT)
+                    .get();
+
+        }else {
+            log.info("HTML 문자열로 판단하여 파싱 시도");
+            String html = lotteUrl != null ? lotteUrl : "";
+            doc = Jsoup.parse(html, "");
+        }
         log.debug(doc.body().html());
 
         ArrayNode initial = InitialDataUtil.findInitialData(doc);
@@ -40,17 +49,17 @@ public class WebCrawlingService {
                 String detailLink  = o.path("productLink").asText(null);
                 String imgLink  = o.path("productImage").asText(null);
                 String market = o.path("storeName").asText(null);
-                String spdNo =  o.path("spdNo").asText(null);
-                String sitmNo= o.path("sitmNo").asText(null);
+
+
                 Integer price = null;
+                String spdNo = null;
+                String sitmNo = null;
                 String category =
                         o.path("categoryName").asText(null); // 1순위: 최상위에 있으면 사용
                 if (category == null || category.isBlank()) {
                     category = o.path("brazeData").path("categoryName").asText(null); // 2순위: brazeData 안
-                }
-                if (category == null || category.isBlank()) {
-                    // 3순위(백업): 코드만 있을 때는 data.category(=categoryNo)라도 확보
-                    category = o.path("data").path("category").asText(null); // 예: "BC67060600"
+                    spdNo =  o.path("brazeData").path("spdNo").asText(null);
+                    sitmNo= o.path("brazeData").path("sitmNo").asText(null);
                 }
 
                 JsonNode pi = o.get("priceInfo");
@@ -74,12 +83,13 @@ public class WebCrawlingService {
                 product.setDetailLink(detailLink);
                 product.setImageUrl(imgLink);
                 product.setMarket(market);
+                product.setSitmNo(sitmNo);
+                product.setSpdNo(spdNo);
                 products.add(product);
 
-                log.debug("spdNo = {} sitmNo= {}", spdNo, sitmNo);
             }
         }
-
+        log.info("=== 크롤링 완료: {}개 상품 파싱 ===", products.size());
         return products;
     }
 

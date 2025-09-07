@@ -8,6 +8,12 @@ public class Product {
     //상품명
     @JsonProperty("product_name")
     private String productName;
+
+    @JsonProperty("spdNo")
+    private String spdNo;
+    @JsonProperty("sitmNo")
+    private String sitmNo;
+
     //상품이미지
     @JsonProperty("image_url")
     private String imageUrl;
@@ -26,4 +32,5 @@ public class Product {
     //판매 장소
     @JsonProperty("market")
     private String market;
+
 }

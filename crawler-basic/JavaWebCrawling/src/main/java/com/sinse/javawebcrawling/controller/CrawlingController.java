@@ -18,7 +18,7 @@ public class CrawlingController {
     @GetMapping("/lotte")
     public List<Product> test()throws IOException {
         String lotteWine= "https://www.lotteon.com/csearch/render/category?render=nqapi&platform=pc&collection_id=9&login=Y&u9=navigate&u8=FC01220406&mallId=1";
-        simpleCrawlerService.starePage(lotteWine);
-        return webCrawlingService.lotteCrawler(lotteWine);
+//        simpleCrawlerService.starePage(lotteWine);
+        return simpleCrawlerService.starePage(lotteWine);
     }
 }
