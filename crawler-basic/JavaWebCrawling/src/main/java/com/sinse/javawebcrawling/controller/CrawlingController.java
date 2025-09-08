@@ -2,8 +2,9 @@ package com.sinse.javawebcrawling.controller;
 
 import com.sinse.javawebcrawling.domain.Product;
 import com.sinse.javawebcrawling.service.SimpleCrawlerService;
-import com.sinse.javawebcrawling.service.WebCrawlingService;
+import com.sinse.javawebcrawling.service.JsonWebCrawlingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,12 +14,14 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class CrawlingController {
-    private final WebCrawlingService webCrawlingService;
+    @Value("${lotte.url}")
+    private String lotteUrl;
+
+    private final JsonWebCrawlingService jsonWebCrawlingService;
     private final SimpleCrawlerService simpleCrawlerService;
     @GetMapping("/lotte")
     public List<Product> test()throws IOException {
-        String lotteWine= "https://www.lotteon.com/csearch/render/category?render=nqapi&platform=pc&collection_id=9&login=Y&u9=navigate&u8=FC01220406&mallId=1";
 //        simpleCrawlerService.starePage(lotteWine);
-        return simpleCrawlerService.starePage(lotteWine);
+        return simpleCrawlerService.starePage(lotteUrl);
     }
 }

@@ -8,12 +8,9 @@ public class Product {
     //상품명
     @JsonProperty("product_name")
     private String productName;
-
-    @JsonProperty("spdNo")
-    private String spdNo;
-    @JsonProperty("sitmNo")
-    private String sitmNo;
-
+    //브랜드
+    @JsonProperty("brand")
+    private String brand;
     //상품이미지
     @JsonProperty("image_url")
     private String imageUrl;
