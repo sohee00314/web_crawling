@@ -47,7 +47,7 @@ public class SimpleCrawlerService {
                     List<Product> pageItems = webCrawlingService.lotteCrawler(html);
                     //최종 상품리스트에 담기
                     allProducts.addAll(pageItems);
-//                    log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
+                    log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
 
                     //다음 페이지로 넘어가는 ui가져오기
                     List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.srchPagination a.srchPaginationNext"));

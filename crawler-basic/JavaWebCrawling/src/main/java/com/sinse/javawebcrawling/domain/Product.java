@@ -3,6 +3,9 @@ package com.sinse.javawebcrawling.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class Product {
     //상품명
@@ -29,5 +32,9 @@ public class Product {
     //판매 장소
     @JsonProperty("market")
     private String market;
+
+    //상품리뷰들
+    @JsonProperty("review_list")
+    private List<Review> reviews = new ArrayList<>();
 
 }
