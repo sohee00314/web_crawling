@@ -15,7 +15,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class SimpleCrawlerService {
-    private final JsonWebCrawlingService jsonWebCrawlingService;
+//    private final JsonWebCrawlingService jsonWebCrawlingService;
     private final WebCrawlingService webCrawlingService;
 
     @Value("${chrom.driver.path}")
