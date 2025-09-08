@@ -31,24 +31,13 @@ public class WebCrawlingService {
         Document doc = Jsoup.parse(html);
         //상품정보들이 포함되여 있는 <il>의 class 이름
         Elements productItems = doc.select(".s-goods-grid__item .s-goods");
-//        if (productItems.isEmpty()) {
-            // 다른 가능한 셀렉터들도 시도
-//            String[] alternativeSelectors = {
-//                    ".s-goods",
-//                    ".prd-item",
-//                    ".goods-item",
-//                    "[data-object*='pd_id']"
-//            };
 
-//            for (String selector : alternativeSelectors) {
-//                productItems = doc.select(selector);
-//                if (!productItems.isEmpty()) {
-//                    log.info("대체 셀렉터 '{}'로 {}개 상품 요소 발견", selector, productItems.size());
-//                    break;
-//                }
-//            }
-//        }
-
+        //더 이상 찾을 수 없으면 상품 리스트 리턴
+        if(productItems.isEmpty()){
+            log.debug("No products found");
+            return products;
+        }
+        //상품목록만큼 반복문 적용
         for (Element item : productItems) {
             try {
                 Product product = extractLotteProduct(item);
@@ -63,14 +52,17 @@ public class WebCrawlingService {
         }
 
         if (products.isEmpty()) {
-            log.warn("롯데온 상품을 찾을 수 없습니다. HTML 구조를 확인하세요.");
-            logLotteHtmlStructure(doc);
+            log.warn("상품을 찾을 수 없습니다.");
         }
 
         return products;
     }
 
-    // 롯데온 상품 개별 추출 로직
+    /**
+     * 추출한 상품정보 Product에 대입
+     * @param item 상품정보가 담겨있는 객체
+     * @return product 반환
+     */
     private Product extractLotteProduct(Element item) {
         Product product = new Product();
 
@@ -161,33 +153,4 @@ public class WebCrawlingService {
         return product;
     }
 
-    // 디버깅용 HTML 구조 분석
-    private void logLotteHtmlStructure(Document doc) {
-        log.info("=== 롯데온 HTML 구조 분석 ===");
-
-        // 상품 관련 클래스 찾기
-        String[] searchClasses = {
-                "s-goods", "s-goods-grid", "prd-item", "goods-item",
-                "product", "item", "list"
-        };
-
-        for (String className : searchClasses) {
-            Elements elements = doc.select("." + className);
-            if (!elements.isEmpty()) {
-                log.info("클래스 '.{}' 요소 {}개 발견", className, elements.size());
-            }
-        }
-
-        // 가격 관련 요소 찾기
-        Elements priceElements = doc.select("*:containsOwn(원)");
-        log.info("'원'이 포함된 요소 {}개 발견", priceElements.size());
-
-        // 이미지 요소 찾기
-        Elements images = doc.select("img[src]");
-        log.info("이미지 요소 {}개 발견", images.size());
-
-        // 링크 요소 찾기
-        Elements links = doc.select("a[href]");
-        log.info("링크 요소 {}개 발견", links.size());
-    }
 }
