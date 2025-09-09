@@ -6,10 +6,12 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.lang.model.element.Element;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -30,6 +32,18 @@ public class DetailCrawling {
             driver = new ChromeDriver();
             driver.manage().window().maximize();
             driver.get(url);
+
+            //성인인증
+            try {
+                //10초 대기
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+                WebElement adultConfirmButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".age-btn")));
+                adultConfirmButton.click();
+                log.info("성인 인증 팝업을 클릭했습니다.");
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                log.debug("로그인상태 또는 팝업창 없음");
+            }
 
             //리뷰페이지 넘아기기 반복문
             while (true){

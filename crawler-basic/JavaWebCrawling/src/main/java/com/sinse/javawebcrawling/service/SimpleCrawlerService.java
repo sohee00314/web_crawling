@@ -19,6 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SimpleCrawlerService {
     private final WebCrawlingService webCrawlingService;
+    private final DetailCrawling detailCrawling;
+
     //ChromDriver.exe 위치
     @Value("${chrom.driver.path}")
     private String WEB_DRIVER_PATH;
@@ -45,6 +47,11 @@ public class SimpleCrawlerService {
                     String html = driver.getPageSource();
                     //각 페이지의 전체 상품을 담은 리스트 가져오기 가져오기
                     List<Product> pageItems = webCrawlingService.lotteCrawler(html);
+
+                    for (Product product : pageItems) {
+                        detailCrawling.detailPage(product.getDetailLink());
+                    }
+
                     //최종 상품리스트에 담기
                     allProducts.addAll(pageItems);
                     log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
