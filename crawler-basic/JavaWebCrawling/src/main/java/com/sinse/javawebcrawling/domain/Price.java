@@ -11,6 +11,9 @@ public class Price {
     //쇼핑몰 이름
     @JsonProperty("shop_name")
     private String shopName;
+    //쇼핑물 아이콘
+    @JsonProperty("shop_icon")
+    private String shopIcon;
     //상품 가격
     @JsonProperty("price")
     private int price;
