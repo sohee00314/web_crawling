@@ -46,15 +46,15 @@ public class CrawlerService {
                     //상품목록 html
                     String html = driver.getPageSource();
                     //각 페이지의 전체 상품을 담은 리스트 가져오기 가져오기
-//                    List<Product> pageItems = webCrawlingService.lotteCrawler(html);
+                    List<Product> pageItems = webCrawlingService.lotteCrawler(html);
 
 //                    for (Product product : pageItems) {
 //                        detailCrawling.detailPage(product.getDetailLink());
 //                    } 상세페이지
 
                     //최종 상품리스트에 담기
-//                    allProducts.addAll(pageItems);
-//                    log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
+                    allProducts.addAll(pageItems);
+                    log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
 
                     //다음 페이지로 넘어가는 ui가져오기
                     List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.num_nav_wrap a.num.now_on + a.num"));
