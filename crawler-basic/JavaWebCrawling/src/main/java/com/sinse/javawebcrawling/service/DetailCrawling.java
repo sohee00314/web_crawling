@@ -75,11 +75,13 @@ public class DetailCrawling {
                     }
                     priceList.add(price);
                 }
-                log.debug("상품 가격목록 {}",priceList);
+                log.debug("상품 가격목록 {}",item.getPrices());
+                item.setPrices(priceList);
             }
 
             //리뷰페이지 넘아기기 반복문 후 파싱
-            product.setReviews(getReviews(driver,html));
+//            item.setReviews(getReviews(driver,html));
+
 
         }
         catch (Exception e){
@@ -98,6 +100,61 @@ public class DetailCrawling {
                 Document doc = Jsoup.parse(html, "https://prod.danawa.com");
 
                 //리뷰 가져오기
+                for (Element li : doc.select("li.danawa-prodBlog-companyReview-clazz-more")){
+                    Review review = new Review();
+                    //작성자
+                    Element nameEl = li.selectFirst(".top_info .name");
+                    if (nameEl != null) review.setReviewer(nameEl.text().trim());
+
+                    //작성일
+                    Element dateEl = li.selectFirst(".top_info .date");
+                    if (dateEl != null) review.setReviewDate(dateEl.text().trim());
+
+                    //별점
+                    int star = 0;
+                    Element starEl = li.selectFirst(".top_info .star_mask");
+                    if (starEl != null) {
+                        String t = starEl.text();//점수 예) "100점"
+                        if (!t.isEmpty()) {
+                            star = parseNum(t);
+                        } else {
+                            String w = starEl.attr("style");// style에 있는 width 예) "width:100%"
+                            if (!w.isEmpty()) star = parseNum(w);
+                        }
+                    }
+                    review.setStar(star);
+
+                    //쇼핑물명
+                    String shopName = null;
+                    //1차로 저회
+                    Element mallImg = li.selectFirst(".top_info .mall img[alt]");
+                    if (mallImg != null && !mallImg.attr("alt").isBlank()) {
+                        shopName = mallImg.attr("alt").trim();
+                    }
+                    if (shopName == null) {
+                        //2차 조회
+                        Element mallSpan = li.selectFirst(".top_info .mall span");
+                        if (mallSpan != null) shopName = mallSpan.text().trim();
+                    }
+                    review.setShopName(shopName);
+
+                    //리뷰제목
+                    Element titleEl = li.selectFirst(".rvw_atc .tit_W .tit");
+                    if (titleEl != null) review.setTitle(titleEl.text().trim());
+
+                    //내용
+                    Element contentEl = li.selectFirst(".rvw_atc .atc_cont .atc");
+                    if (contentEl != null) review.setContent(contentEl.text().trim());
+
+                    // 사진들
+                    for (Element img : li.select(".pto_thumb img, .pto_list img")) {
+                        String src = img.attr("abs:src");
+                        if (!src.isBlank()) review.getPhotos().add(src);
+                    }
+
+                    reviews.add(review);
+                    log.debug("리뷰목록 {}",reviews);
+                }
 
 
                 List<WebElement> next = driver.findElements(By
