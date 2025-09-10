@@ -105,7 +105,8 @@ public class WebCrawlingService {
         if (categoryElement != null) {
             for(TextNode textNode : categoryElement.textNodes()) {
                 if(!textNode.isBlank()){
-                    category = categoryElement.text().trim();
+                    String all = categoryElement.text().trim();
+                    category = all.split("/")[0].trim();
                 }
             }
         }
