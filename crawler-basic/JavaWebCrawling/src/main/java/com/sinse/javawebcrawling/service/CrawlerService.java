@@ -57,12 +57,14 @@ public class CrawlerService {
                     log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
 
                     //다음 페이지로 넘어가는 ui가져오기
-                    List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.num_nav_wrap a.num.now_on + a.num"));
+//                    List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.num_nav_wrap a.num.now_on + a.num, div.num_nav_wrap a.edge_nav.nav_next, div.num_nav_wrap a.nav_next"));
+                    List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.num_nav_wrap a.num.now_on + a.num")); // 테스트용 10페이지
                     if (nextButtons.isEmpty()) {
                         // 다음 페이지 버튼이 없으면 마지막 페이지
                         log.info("마지막 페이지 도달");
                         break;
                     }
+
                     //다음페이지로 넘가기기 클릭
                     WebElement next = nextButtons.get(0);
                     ((JavascriptExecutor) driver).executeScript("arguments[0].click();", next);
