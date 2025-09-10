@@ -47,8 +47,8 @@ public class DetailCrawling {
                     Element logoImg = element.selectFirst(".box__logo img.image[alt]");
                     if (logoImg != null) {
                         price.setShopName(logoImg.attr("alt").trim());
-                        String icon = logoImg.attr("abs:src");                 // // → https 자동 보정
-                        if (icon.isEmpty()) {                                  // [FIX] 빈 문자열 체크
+                        String icon = logoImg.attr("abs:src");
+                        if (icon.isEmpty()) {
                             icon = logoImg.attr("src");
                             if (icon.startsWith("//")) icon = "https:" + icon;
                         }
@@ -89,11 +89,11 @@ public class DetailCrawling {
                     priceList.add(price);
                 }
                 item.setPrices(priceList);
-                log.debug("상품 가격목록 {}",item.getPrices());
             }
 
             //리뷰페이지 넘아기기 반복문 후 파싱
-//            item.setReviews(getReviews(driver,html));
+            item.setReviews(getReviews(driver,html));
+            log.debug("리뷰목록 {}",item.getReviews());
 
 
         }
@@ -166,7 +166,6 @@ public class DetailCrawling {
                     }
 
                     reviews.add(review);
-                    log.debug("리뷰목록 {}",reviews);
                 }
 
 
