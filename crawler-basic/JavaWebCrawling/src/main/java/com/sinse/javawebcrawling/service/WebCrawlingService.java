@@ -31,7 +31,10 @@ public class WebCrawlingService {
         //크롤링할 웹사이트 html
         Document doc = Jsoup.parse(html);
         //상품정보들이 포함되여 있는 <il>의 class 이름
-        Elements productItems = doc.select("li.prod_item prod_layer div.prod_main_info");
+        Elements productItems = doc.select("li.prod_item.prod_layer > div.prod_main_info");
+        if (productItems.isEmpty()) {
+            productItems = doc.select("div.prod_main_info");
+        }
 
         //더 이상 찾을 수 없으면 상품 리스트 리턴
         if(productItems.isEmpty()){
@@ -42,9 +45,9 @@ public class WebCrawlingService {
         for (Element item : productItems) {
             try {
                 Product product = extractLotteProduct(item);
-                if (product != null && product.getProductName() != null && !product.getProductName().trim().isEmpty()) {
-//            log.debug("상품 추출 성공 - 마트: {}, 브랜드: {}, 상품명: {}, 원가: {}, 할인가: {}",
-//                    product.getMarket(), product.getBrand(),product.getProductName(),product.getPrice(),product.getDiscount());
+                if (product != null && !product.getProductName().trim().isEmpty()) {
+            log.debug("상품 추출 성공 - 상품명: {}, 카테고리 {}, 상세페이지: {}, 이미지: {}",
+                    product.getProductName(),product.getCategory(),product.getDetailLink(),product.getImageUrl());
                     products.add(product);
                 }
             } catch (Exception e) {
