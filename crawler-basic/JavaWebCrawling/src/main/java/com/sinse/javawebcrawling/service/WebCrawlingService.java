@@ -25,7 +25,7 @@ public class WebCrawlingService {
      * @return List 반환
      * @throws IOException 에러 정의
      */
-    public List<Product> lotteCrawler(String html) throws IOException {
+    public List<Product> crawler(String html) throws IOException {
         //상품을 저장할 리스트
         List<Product> products = new ArrayList<>();
         //크롤링할 웹사이트 html

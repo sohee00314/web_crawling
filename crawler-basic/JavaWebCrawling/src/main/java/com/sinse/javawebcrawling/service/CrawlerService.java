@@ -1,6 +1,7 @@
 package com.sinse.javawebcrawling.service;
 
 import com.sinse.javawebcrawling.domain.Product;
+import com.sinse.javawebcrawling.exception.ShowPageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
@@ -32,7 +33,7 @@ public class CrawlerService {
      * @param url 상품품목록 링크
      * @return 전체 상품 목록 반환
      */
-    public List<Product> starePage(String url){
+    public List<Product> starePage(String url)throws ShowPageException {
         //전체 페이지에 있는 상품들을 저장한 리스트
         List<Product> allProducts = new ArrayList<>();
         try {
@@ -46,11 +47,12 @@ public class CrawlerService {
                     //상품목록 html
                     String html = driver.getPageSource();
                     //각 페이지의 전체 상품을 담은 리스트 가져오기 가져오기
-                    List<Product> pageItems = webCrawlingService.lotteCrawler(html);
+                    List<Product> pageItems = webCrawlingService.crawler(html);
 
-//                    for (Product product : pageItems) {
-//                        detailCrawling.detailPage(product.getDetailLink());
-//                    } 상세페이지
+                    //자동으로 상세페이지 들어가기
+                    for (Product product : pageItems) {
+                        detailCrawling.detailPage(product.getDetailLink());
+                    }
 
                     //최종 상품리스트에 담기
                     allProducts.addAll(pageItems);
@@ -71,13 +73,15 @@ public class CrawlerService {
                     Thread.sleep(3000);
                 } catch (InterruptedException e){
                     Thread.currentThread().interrupt();
-                    log.error("스레드 중단");
+                    if(driver != null){
+                        throw new RuntimeException("스레드 정지");
+                    }
                 }
 
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ShowPageException(e.getMessage());
         }finally {
             if(driver!=null){
                 //드라이버 닫기
