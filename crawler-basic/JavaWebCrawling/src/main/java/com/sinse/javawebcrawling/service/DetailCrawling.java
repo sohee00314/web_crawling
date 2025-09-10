@@ -169,11 +169,16 @@ public class DetailCrawling {
                 }
 
 
+//                List<WebElement> next = driver.findElements(By
+//                        .cssSelector(
+//                                "div.page_nav_area .nums_area .page_num.now_page + a.page_num, "
+//                                        + "div.page_nav_area a.nav_edge.nav_edge_next.nav_edge_on"));
+
+                //테스트용
                 List<WebElement> next = driver.findElements(By
                         .cssSelector(
-                                "div.page_nav_area .nums_area .page_num.now_page + a.page_num, "
-//                                        + "div.page_nav_area a.nav_edge.nav_edge_next.nav_edge_on" //테스트 용
-                        ));
+                                "div.page_nav_area .nums_area .page_num.now_page + a.page_num"));
+
 
                 //마지막페이지 도달
                 if(next.isEmpty()){
