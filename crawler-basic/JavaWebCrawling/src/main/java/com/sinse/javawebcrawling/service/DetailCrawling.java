@@ -56,7 +56,7 @@ public class DetailCrawling {
                     Element priceNum = shop.selectFirst(".box__price .sell-price .text__num");
                     if (priceNum != null) {
                         //숫자만 얻어오기
-                        price.setPrice(parseMoney(priceNum.text()));
+                        price.setPrice(parseNum(priceNum.text()));
                     }
 
                     //배송비
@@ -64,7 +64,7 @@ public class DetailCrawling {
                     if (delivery != null) {
                         String d = delivery.text().trim();
                         //무료라고 적혀있으면 0, 배송비 끝 '원'제거하고 숫자로 저장
-                        int fee = d.contains("무료") ? 0 : parseMoney(d);
+                        int fee = d.contains("무료") ? 0 : parseNum(d);
                         price.setDeliveryFee(fee);
                     }
                     //구매사이트
@@ -124,11 +124,11 @@ public class DetailCrawling {
     }
 
     /**
-     * 상품가격 또는 배송비에 적혀있는 숫자만 구하기
+     * 문자열에 포함되여 있는 숫자를 반환하기
      * @param s 숫자가 포함되여 있는 문자열
      * @return 숫자만 반환
      */
-    static int parseMoney(String s) {
+    static int parseNum(String s) {
         String digits = s.replaceAll("[^0-9]", "");
         return digits.isEmpty() ? 0 : Integer.parseInt(digits);
     }
