@@ -17,6 +17,9 @@ public class Review {
     //쇼핑몰 이름
     @JsonProperty("shop_name")
     private String shopName;
+    //작성일
+    @JsonProperty("review_date")
+    private String reviewDate;
     //제목
     @JsonProperty("title")
     private String title;
