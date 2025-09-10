@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -79,8 +78,8 @@ public class DetailCrawling {
                 log.debug("상품 가격목록 {}",priceList);
             }
 
-            //리뷰페이지 넘아기기 반복문
-            getReviews(product,driver);
+            //리뷰페이지 넘아기기 반복문 후 파싱
+            product.setReviews(getReviews(driver,html));
 
         }
         catch (Exception e){
@@ -89,11 +88,18 @@ public class DetailCrawling {
         return item;
     }
 
-    public List<Review> getReviews(Product product,WebDriver driver) {
+    public List<Review> getReviews(WebDriver driver,String html) {
         List<Review> reviews = new ArrayList<>();
         while (true){
             try {
                 //다음페이지로 넘어가는 UI이 조회
+
+                //현재 페이지
+                Document doc = Jsoup.parse(html, "https://prod.danawa.com");
+
+                //리뷰 가져오기
+
+
                 List<WebElement> next = driver.findElements(By
                         .cssSelector("div.page_nav_area .nums_area .page_num.now_page + a.page_num, " +
                                 "div.page_nav_area a.nav_edge.nav_edge_next.nav_edge_on"));
