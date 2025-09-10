@@ -14,14 +14,13 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class CrawlingController {
-    @Value("${lotte.url}")
-    private String lotteUrl;
+    @Value("${website.url}")
+    private String url;
 
     private final JsonWebCrawlingService jsonWebCrawlingService;
     private final SimpleCrawlerService simpleCrawlerService;
-    @GetMapping("/lotte")
+    @GetMapping("/crawling")
     public List<Product> test()throws IOException {
-//        simpleCrawlerService.starePage(lotteWine);
-        return simpleCrawlerService.starePage(lotteUrl);
+        return simpleCrawlerService.starePage(url);
     }
 }
