@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +48,38 @@ public class CrawlerService {
                 try {
                     //상품목록 html
                     String html = driver.getPageSource();
+                    //현재 탭(상품 목록 페이지)의 핸들(고유 ID)을 저장합니다.
+                    String originalTab = driver.getWindowHandle();
                     //각 페이지의 전체 상품을 담은 리스트 가져오기 가져오기
                     List<Product> pageItems = webCrawlingService.crawler(html);
 
                     //자동으로 상세페이지 들어가기
                     for (Product p : pageItems) {
-                        Product product=detailCrawling.detailPage(p,driver);
-                        //반환받은 product에 데이터 추가
+                        // 새로운 탭 열기
+                        ((JavascriptExecutor) driver).executeScript(
+                                "window.open(arguments[0], '_blank');", p.getDetailLink()
+                        );
+
+                        //새 탭이 열릴 때까지 대기 (핸들 수가 2개 이상이 될 때)
+                        new WebDriverWait(driver, Duration.ofSeconds(10))
+                                .until(d -> d.getWindowHandles().size() > 1);
+
+                        //새로 열린 상세 탭으로 전환
+                        String detailHandle = driver.getWindowHandles().stream()
+                                .filter(h -> !h.equals(originalTab))
+                                .findFirst().orElseThrow();
+                        driver.switchTo().window(detailHandle);
+
+                        // 상세 크롤링 (동일 드라이버 사용)
+                        Product product = detailCrawling.detailPage(p, driver);
+
+                        // 상세페이지 탭만 닫고
+                        driver.close();
+
+                        //원래 '목록' 탭으로 복귀
+                        driver.switchTo().window(originalTab);
+
+                        // 결과 병합
                         p.setContent(product.getContent());
                         p.setPrices(product.getPrices());
                         p.setReviews(product.getReviews());
