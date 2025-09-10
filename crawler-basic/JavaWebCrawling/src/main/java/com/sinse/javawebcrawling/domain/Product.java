@@ -20,18 +20,15 @@ public class Product {
     //카테고리
     @JsonProperty("category")
     private String category;
-    //가격
-    @JsonProperty("price")
-    private int price;
-    //할인가
-    @JsonProperty("discount")
-    private int discount;
     //상세 링크
     @JsonProperty("detail_link")
     private String detailLink;
-    //판매 장소
-    @JsonProperty("market")
-    private String market;
+    //상세정보
+    @JsonProperty("content")
+    private String content;
+    //가격
+    @JsonProperty("prices")
+    private List<Price> prices = new ArrayList<>();
 
     //상품리뷰들
     @JsonProperty("review_list")
