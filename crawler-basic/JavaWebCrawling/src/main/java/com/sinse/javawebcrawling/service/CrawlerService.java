@@ -57,7 +57,7 @@ public class CrawlerService {
 //                    log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
 
                     //다음 페이지로 넘어가는 ui가져오기
-                    List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.srchPagination a.srchPaginationNext"));
+                    List<WebElement> nextButtons = driver.findElements(By.cssSelector("div.num_nav_wrap a.num.now_on + a.num"));
                     if (nextButtons.isEmpty()) {
                         // 다음 페이지 버튼이 없으면 마지막 페이지
                         log.info("마지막 페이지 도달");
