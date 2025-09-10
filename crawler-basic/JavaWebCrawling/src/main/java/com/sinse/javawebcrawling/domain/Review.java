@@ -14,6 +14,9 @@ public class Review {
     //별점
     @JsonProperty("star")
     private int star;
+    //쇼핑몰 이름
+    @JsonProperty("shop_name")
+    private String shopName;
     //리뷰내용
     @JsonProperty("content")
     private String content;
