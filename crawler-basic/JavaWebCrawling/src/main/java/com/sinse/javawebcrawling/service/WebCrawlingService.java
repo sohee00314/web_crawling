@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ public class WebCrawlingService {
         //크롤링할 웹사이트 html
         Document doc = Jsoup.parse(html);
         //상품정보들이 포함되여 있는 <il>의 class 이름
-        Elements productItems = doc.select(".s-goods-grid__item .s-goods");
+        Elements productItems = doc.select("li.prod_item prod_layer div.prod_main_info");
 
         //더 이상 찾을 수 없으면 상품 리스트 리턴
         if(productItems.isEmpty()){
@@ -66,30 +67,18 @@ public class WebCrawlingService {
     private Product extractLotteProduct(Element item) {
         Product product = new Product();
 
-        // 1. 마트명 추출
-        String market = "롯데온"; // 기본값
-        Element marketElement = item.select(".s-goods-flag__spot").first();
-        if (marketElement != null && !marketElement.text().trim().isEmpty()) {
-            market = marketElement.text().trim();
-        }
 
-        // 2. 브랜드 추출
-        String brand = null;
-        Element brandElement = item.select(".s-goods-title__brand").first();
-        if (brandElement != null) {
-            brand = brandElement.text().trim();
-        }
 
-        // 3. 상품명 추출 (브랜드 + 상품명)
+        // 1. 상품명 추출 (브랜드 + 상품명)
         String productName = null;
-        Element titleElement = item.select(".s-goods-title").first();
+        Element titleElement = item.select("a[name=productName]").first();
         if (titleElement != null) {
             productName = titleElement.text().trim();
         }
 
-        // 4. 상품 이미지 추출
+        // 2. 상품 이미지 추출
         String imageUrl = null;
-        Element imgElement = item.select(".s-goods-image img").first();
+        Element imgElement = item.select("div.thumb_image a.thumb_link img").first();
         if (imgElement != null) {
             imageUrl = imgElement.attr("src");
             if (imageUrl != null && imageUrl.startsWith("//")) {
@@ -97,59 +86,35 @@ public class WebCrawlingService {
             }
         }
 
-        // 5. 상세페이지 링크 추출
+        // 3. 상세페이지 링크 추출
         String detailLink = null;
-        Element linkElement = item.select(".s-goods__anchor").first();
+        Element linkElement = item.select("a[name=productName]").first();
         if (linkElement != null) {
             detailLink = linkElement.attr("href");
             if (detailLink != null && !detailLink.startsWith("http")) {
-                detailLink = "https://www.lotteon.com" + detailLink;
+                detailLink = "https://prod.danawa.com" + detailLink;
             }
         }
 
-        // 6. 원가 추출
-        Integer originalPrice = null;
-        Element originalPriceElement = item.select(".s-goods-price__original .s-goods-price__number").first();
-        if (originalPriceElement != null) {
-            String priceText = originalPriceElement.text().replaceAll("[^0-9]", "");
-            if (!priceText.isEmpty()) {
-                try {
-                    originalPrice = Integer.parseInt(priceText);
-                } catch (NumberFormatException e) {
-                    log.debug("원가 파싱 실패: {}", originalPriceElement.text());
+        //카테고리 가져오기
+        String category = null;
+        Element categoryElement = item.select("div.spec_list").first();
+        if (categoryElement != null) {
+            for(TextNode textNode : categoryElement.textNodes()) {
+                if(!textNode.isBlank()){
+                    category = categoryElement.text().trim();
                 }
             }
         }
 
-        // 7. 할인가 (최종가격) 추출
-        Integer finalPrice = null;
-        Element finalPriceElement = item.select(".s-goods-price__final .s-goods-price__number").first();
-        if (finalPriceElement != null) {
-            String priceText = finalPriceElement.text().replaceAll("[^0-9]", "");
-            if (!priceText.isEmpty()) {
-                try {
-                    finalPrice = Integer.parseInt(priceText);
-                } catch (NumberFormatException e) {
-                    log.debug("할인가 파싱 실패: {}", finalPriceElement.text());
-                }
-            }
-        }
-
-        // 할인가가 없으면 원가를 사용
-        Integer price = finalPrice != null ? finalPrice : originalPrice;
 
         // Product 객체 설정
         product.setProductName(productName);
-        product.setPrice(price);
         product.setImageUrl(imageUrl);
         product.setDetailLink(detailLink);
-        product.setMarket(market);
-        product.setBrand(brand);
-        product.setCategory(null); //상세페이지에게 가져올 내용
+        product.setCategory(category);
 
-        // 추출된 정보 로그 (첫 번째 상품만)
-        if (product.getProductName() != null) {
-        }
+
         return product;
     }
 
