@@ -44,10 +44,10 @@ public class WebCrawlingService {
         //상품목록만큼 반복문 적용
         for (Element item : productItems) {
             try {
-                Product product = extractLotteProduct(item);
-                if (product != null && !product.getProductName().trim().isEmpty()) {
-            log.debug("상품 추출 성공 - 상품명: {}, 카테고리 {}, 상세페이지: {}, 이미지: {}",
-                    product.getProductName(),product.getCategory(),product.getDetailLink(),product.getImageUrl());
+                Product product = getProduct(item);
+                if (!product.getProductName().trim().isEmpty()) {
+//            log.debug("상품 추출 성공 - 상품명: {}, 카테고리 {}, 상세페이지: {}, 이미지: {}",
+//                    product.getProductName(),product.getCategory(),product.getDetailLink(),product.getImageUrl());
                     products.add(product);
                 }
             } catch (Exception e) {
@@ -67,7 +67,7 @@ public class WebCrawlingService {
      * @param item 상품정보가 담겨있는 객체
      * @return product 반환
      */
-    private Product extractLotteProduct(Element item) {
+    private Product getProduct(Element item) {
         Product product = new Product();
 
 
