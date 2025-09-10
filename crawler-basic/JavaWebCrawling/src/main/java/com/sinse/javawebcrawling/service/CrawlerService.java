@@ -79,10 +79,10 @@ public class CrawlerService {
                         //원래 '목록' 탭으로 복귀
                         driver.switchTo().window(originalTab);
 
-                        // 결과 병합
-                        p.setContent(product.getContent());
-                        p.setPrices(product.getPrices());
-                        p.setReviews(product.getReviews());
+                        // 결과 파싱
+                        p.setContent(product.getContent()); //상품정보
+                        p.setPrices(product.getPrices()); // 상품 가격리스트
+                        p.setReviews(product.getReviews()); // 상품 리뷰 리스트
                         allProducts.add(p);
                     }
 
