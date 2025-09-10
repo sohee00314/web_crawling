@@ -50,12 +50,16 @@ public class CrawlerService {
                     List<Product> pageItems = webCrawlingService.crawler(html);
 
                     //자동으로 상세페이지 들어가기
-                    for (Product product : pageItems) {
-                        detailCrawling.detailPage(product.getDetailLink());
+                    for (Product p : pageItems) {
+                        Product product=detailCrawling.detailPage(p,driver);
+                        //반환받은 product에 데이터 추가
+                        p.setContent(product.getContent());
+                        p.setPrices(product.getPrices());
+                        p.setReviews(product.getReviews());
+                        allProducts.add(p);
                     }
 
                     //최종 상품리스트에 담기
-                    allProducts.addAll(pageItems);
                     log.info("현재 페이지에서 {}개 상품 수집, 총 {}개", pageItems.size(), allProducts.size());
 
                     //다음 페이지로 넘어가는 ui가져오기
