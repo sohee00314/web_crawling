@@ -35,32 +35,45 @@ public class DetailCrawling {
             String html = driver.getPageSource();
             if(html != null){
                 //상세페이지 ui 조사
-                Document doc = Jsoup.parse(html);
+                Document doc = Jsoup.parse(html, "https://prod.danawa.com");
 
                 //가격들을 저장할 리스트
                 List<Price> priceList = new ArrayList<>();
                 //가격들이 있는 class 조회
-                for(Element element : doc.getElementsByClass("li.list-item")) {
+                for(Element element : doc.select("#lowPriceCompanyArea ul.list__mall-price li.list-item")) {
                     Price price = new Price();
 
                     //쇼핑몰 구하기
-                    Element shop = element.selectFirst(".box__logo img");
-                    if(shop != null) {
-                        //쇼핑몰 이름
-                        price.setShopName(shop.attr("alt").trim());
-                        //쇼핑몰 이이콘
-                        price.setShopIcon(shop.attr("abs:src"));
+                    Element logoImg = element.selectFirst(".box__logo img.image[alt]");
+                    if (logoImg != null) {
+                        price.setShopName(logoImg.attr("alt").trim());
+                        String icon = logoImg.attr("abs:src");                 // // → https 자동 보정
+                        if (icon.isEmpty()) {                                  // [FIX] 빈 문자열 체크
+                            icon = logoImg.attr("src");
+                            if (icon.startsWith("//")) icon = "https:" + icon;
+                        }
+                        price.setShopIcon(icon);
+                    } else {
+                        // [FIX] 텍스트 로고 처리(술픽 등)
+                        Element textLogo = element.selectFirst(".box__logo .text__logo");
+                        if (textLogo != null) {
+                            String name = textLogo.hasAttr("aria-label")
+                                    ? textLogo.attr("aria-label").trim()
+                                    : textLogo.text().trim();
+                            price.setShopName(name);
+                        }
+                        // 아이콘은 없음(null 허용)
                     }
 
                     //가격
-                    Element priceNum = shop.selectFirst(".box__price .sell-price .text__num");
+                    Element priceNum = element.selectFirst(".box__price .sell-price .text__num");
                     if (priceNum != null) {
                         //숫자만 얻어오기
                         price.setPrice(parseNum(priceNum.text()));
                     }
 
                     //배송비
-                    Element delivery = shop.selectFirst(".box__delivery");
+                    Element delivery = element.selectFirst(".box__delivery");
                     if (delivery != null) {
                         String d = delivery.text().trim();
                         //무료라고 적혀있으면 0, 배송비 끝 '원'제거하고 숫자로 저장
@@ -68,15 +81,15 @@ public class DetailCrawling {
                         price.setDeliveryFee(fee);
                     }
                     //구매사이트
-                    Element link = shop.selectFirst("a.link__full-cover[href]");
+                    Element link = element.selectFirst("a.link__full-cover[href]");
                     if (link != null) {
                         //구매 링크 사이트 저장
                         price.setShopLink(link.attr("abs:href"));
                     }
                     priceList.add(price);
                 }
-                log.debug("상품 가격목록 {}",item.getPrices());
                 item.setPrices(priceList);
+                log.debug("상품 가격목록 {}",item.getPrices());
             }
 
             //리뷰페이지 넘아기기 반복문 후 파싱
