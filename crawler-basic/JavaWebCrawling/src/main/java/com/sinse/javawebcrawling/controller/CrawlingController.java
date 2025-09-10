@@ -1,8 +1,7 @@
 package com.sinse.javawebcrawling.controller;
 
 import com.sinse.javawebcrawling.domain.Product;
-import com.sinse.javawebcrawling.service.SimpleCrawlerService;
-import com.sinse.javawebcrawling.service.JsonWebCrawlingService;
+import com.sinse.javawebcrawling.service.CrawlerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +16,9 @@ public class CrawlingController {
     @Value("${website.url}")
     private String url;
 
-    private final JsonWebCrawlingService jsonWebCrawlingService;
-    private final SimpleCrawlerService simpleCrawlerService;
+    private final CrawlerService crawlerService;
     @GetMapping("/crawling")
     public List<Product> test()throws IOException {
-        return simpleCrawlerService.starePage(url);
+        return crawlerService.starePage(url);
     }
 }
