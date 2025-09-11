@@ -11,6 +11,9 @@ public class Product {
     //상품명
     @JsonProperty("product_name")
     private String productName;
+    //상품코드
+    @JsonProperty("product_code")
+    private int code;
     //브랜드
     @JsonProperty("brand")
     private String brand;
