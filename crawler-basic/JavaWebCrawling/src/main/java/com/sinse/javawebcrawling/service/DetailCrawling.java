@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 상세페이지이지 중 리뷰목록을 자동으로 넘어가기
@@ -37,22 +39,22 @@ public class DetailCrawling {
                 //상세페이지 ui 조사
                 Document doc = Jsoup.parse(html, "https://prod.danawa.com");
 
+                //상품정보 가져오기
+                item.setContent(isContent(doc));
+
                 //상품 카테고리 및 종류 ,정보 가져오기
                 String category = getCategory(doc).get(0);
                 String kind= getCategory(doc).get(1);
-                String content = getCategory(doc).get(2);
                 item.setCategory(category);
                 item.setProductKind(kind);
-                item.setContent(content);
 
-                log.debug(item.getContent());
                 //가격들을 저장할 리스트
                 List<Price> priceList = getPrices(doc);
                 item.setPrices(priceList);
             }
 
             //리뷰페이지 넘아기기 반복문 후 파싱
-            item.setReviews(getReviews(driver,html));
+//            item.setReviews(getReviews(driver,html));
 
 
         }
@@ -189,28 +191,9 @@ public class DetailCrawling {
             }
         }
 
-        //상품정보 구하기
-        Element labelCell = doc.selectFirst(
-                "tr > td:has(b:matchesOwn(^\\s*제품\\s*설명\\s*$))"// <td><b>제품 설명</b>
-        );
-
-        String content = null;
-        if (labelCell != null) {
-            // 2) 같은 행(tr)에서 라벨 바로 다음 형제 td가 내용 셀
-            Element contentTd = labelCell.nextElementSibling();
-            if (contentTd != null && contentTd.tagName().equalsIgnoreCase("td")) {
-                // <p>가 여러 개면 줄바꿈으로 이어붙임
-                List<String> lines = contentTd.select("p").eachText();
-                content = lines.isEmpty() ? contentTd.text() : String.join("\n", lines);
-
-                // 과도한 공백 정리
-                content = content.replaceAll("\\s{2,}", " ").trim();
-            }
-        }
 
         ck.add(category); // index(0)
         ck.add(kind); // index(1)
-        ck.add(content); // index(2)
         return ck;
     }
 
@@ -273,6 +256,37 @@ public class DetailCrawling {
         }
 
         return  prices;
+    }
+
+    /**
+     * 상품정보 구하기
+     * @param doc 파싱한 html 정보
+     * @return String content 반환
+     */
+    public String isContent(Document doc) {
+        String content = null;
+        //가져온 html를 텍스트화
+        String fullText = doc.text();
+        //제품설명 앞뒤 공백 및 허용하고 한글이 아닌 글자 제거(그릅1)하고 각 줄에 최소 한 글자 이상의 한글이 포함된 열 구하기(그릅2)
+        Pattern pattern = java.util.regex.Pattern.compile(
+                "제품\\s*설명\\s*([^가-힣]*?)([가-힣][^\\n]*(?:\\n[^가-힣\\n]*[가-힣][^\\n]*)*)",
+                Pattern.MULTILINE | Pattern.DOTALL
+        );
+
+        //특정 문자열에 검색기 초기화
+        Matcher matcher = pattern.matcher(fullText);
+
+        if (matcher.find()) {
+            //그룸2의 문자열에서 공백 제거 얻기
+            String extracted = matcher.group(2).trim();
+            //수상|인증|제조사|본 콘텐츠 앞부분 문자까지 구하기
+            extracted = extracted.split("(?=수상|인증|제조사|본 콘텐츠)")[0].trim();
+            if (extracted.length() > 10) {
+                //불필요한 공백 제거
+                content = extracted.replaceAll("\\s{2,}", " ");
+            }
+        }
+        return content;
     }
 
     /**
