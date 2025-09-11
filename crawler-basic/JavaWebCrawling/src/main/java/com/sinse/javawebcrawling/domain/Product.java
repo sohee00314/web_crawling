@@ -14,9 +14,6 @@ public class Product {
     //상품코드
     @JsonProperty("product_code")
     private int code;
-    //브랜드
-    @JsonProperty("brand")
-    private String brand;
     //상품이미지
     @JsonProperty("image_url")
     private String imageUrl;
