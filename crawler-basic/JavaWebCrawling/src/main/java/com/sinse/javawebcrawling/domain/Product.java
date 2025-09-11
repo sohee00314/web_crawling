@@ -20,15 +20,15 @@ public class Product {
     //상품이미지
     @JsonProperty("image_url")
     private String imageUrl;
-    //카테고리
+    //주종
     @JsonProperty("category")
     private String category;
+    //종류
+    @JsonProperty("product_kind")
+    private String productKind;
     //상세 링크
     @JsonProperty("detail_link")
     private String detailLink;
-    //상세정보
-    @JsonProperty("content")
-    private String content;
     //가격
     @JsonProperty("prices")
     private List<Price> prices = new ArrayList<>();
