@@ -80,7 +80,8 @@ public class CrawlerService {
                         driver.switchTo().window(originalTab);
 
                         // 결과 파싱
-                        p.setContent(product.getContent()); //상품정보
+                        p.setCategory(product.getCategory()); // 주종
+                        p.setProductKind(product.getProductKind()); // 종류
                         p.setPrices(product.getPrices()); // 상품 가격리스트
                         p.setReviews(product.getReviews()); // 상품 리뷰 리스트
                         allProducts.add(p);
