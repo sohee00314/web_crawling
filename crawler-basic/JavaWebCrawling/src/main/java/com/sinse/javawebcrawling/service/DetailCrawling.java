@@ -38,88 +38,14 @@ public class DetailCrawling {
                 Document doc = Jsoup.parse(html, "https://prod.danawa.com");
 
                 //상품 카테고리 및 종류 가져오기
-                Element root =
-                        doc.selectFirst("table:has(th:matchesOwn(^\\s*주종\\s*$)), " +   // '주종' th를 가진 테이블
-                                "#infoBottom, #productSpec, .prod_spec, .detail_info"); // 페이지별 ID/클래스
-                String category = null;
-                String kind     = null;
-                if(root != null){
-                    // "양주 종류 " 아래에 있는 <td> 찾기
-                    Element tdKindFirst = root.selectFirst(
-                            "tr > th.tit:matchesOwn(^\\s*양주\\s*종류\\s*$) + td.dsc"
-                    );
-                    //첫번째 <td> 찾기
-                    if (tdKindFirst != null) {
-                        //상품 종류 파싱(위스키, 레드와인 등)
-                        kind = tdKindFirst.text().trim();
-                        if (kind.isEmpty()) kind = null;
-                    }
-
-                    //주종 찾기
-                    Element tdCategory = root.selectFirst(
-                            "tr:has(> th.tit:matchesOwn(^\\s*주종\\s*$)) > td.dsc"
-                    );
-                    //상품 주종 파싱
-                    if (tdCategory != null) {
-                        category = tdCategory.text().trim();
-                    }
-                }
+                String category = getCategory(doc).get(0);
+                String kind= getCategory(doc).get(1);
                 item.setCategory(category);
                 item.setProductKind(kind);
 
 
                 //가격들을 저장할 리스트
-                List<Price> priceList = new ArrayList<>();
-                //가격들이 있는 class 조회
-                for(Element element : doc.select("#lowPriceCompanyArea ul.list__mall-price li.list-item")) {
-                    Price price = new Price();
-
-                    //쇼핑몰 구하기
-                    Element logoImg = element.selectFirst(".box__logo img.image[alt]");
-                    if (logoImg != null) {
-                        price.setShopName(logoImg.attr("alt").trim());
-                        String icon = logoImg.attr("abs:src");
-                        if (icon.isEmpty()) {
-                            icon = logoImg.attr("src");
-                            if (icon.startsWith("//")) icon = "https:" + icon;
-                        }
-                        price.setShopIcon(icon);
-                    } else {
-                        //텍스트 로고 처리(술픽 등)
-                        Element textLogo = element.selectFirst(".box__logo .text__logo");
-                        if (textLogo != null) {
-                            String name = textLogo.hasAttr("aria-label")
-                                    ? textLogo.attr("aria-label").trim()
-                                    : textLogo.text().trim();
-                            price.setShopName(name);
-                        }
-                        // 아이콘은 없음(null 허용)
-                    }
-
-
-                    //가격
-                    Element priceNum = element.selectFirst(".box__price .sell-price .text__num");
-                    if (priceNum != null) {
-                        //숫자만 얻어오기
-                        price.setPrice(parseNum(priceNum.text()));
-                    }
-
-                    //배송비
-                    Element delivery = element.selectFirst(".box__delivery");
-                    if (delivery != null) {
-                        String d = delivery.text().trim();
-                        //무료라고 적혀있으면 0, 배송비 끝 '원'제거하고 숫자로 저장
-                        int fee = d.contains("무료") ? 0 : parseNum(d);
-                        price.setDeliveryFee(fee);
-                    }
-                    //구매사이트
-                    Element link = element.selectFirst("a.link__full-cover[href]");
-                    if (link != null) {
-                        //구매 링크 사이트 저장
-                        price.setShopLink(link.attr("abs:href"));
-                    }
-                    priceList.add(price);
-                }
+                List<Price> priceList = getPrices(doc);
                 item.setPrices(priceList);
             }
 
@@ -135,7 +61,8 @@ public class DetailCrawling {
     }
 
     /**
-     * 상품 리뷰 데이터 구하기
+     * 상품 리뷰 데이터 구하기<br>
+     *
      * @param driver 상품목록 때 사용한 driver 재사용
      * @param html 상품상세페이지 html
      * @return 리부리스트 반환
@@ -196,13 +123,6 @@ public class DetailCrawling {
                     Element contentEl = li.selectFirst(".rvw_atc .atc_cont .atc");
                     if (contentEl != null) review.setContent(contentEl.text().trim());
 
-                    // 사진들
-                    for (Element img : li.select(".pto_thumb img, .pto_list img")) {
-                        String src = img.attr("abs:src");
-                        if (!src.isBlank()) review.getPhotos().add(src);
-                    }
-
-                    reviews.add(review);
                 }
 
 
@@ -236,8 +156,103 @@ public class DetailCrawling {
         return reviews;
     }
 
-    public Product getCategory(Document doc){
-        return null;
+    /**
+     * 상품 주종과 종류를 파싱하기
+     * @param doc 파싱을 html
+     * @return index(0)=category index(1)=kind인 String 리스트 반환
+     */
+    public List<String> getCategory(Document doc){
+        List<String> ck = new ArrayList<>();
+        Element root =
+                doc.selectFirst("table:has(th:matchesOwn(^\\s*주종\\s*$)), " +   // '주종' th를 가진 테이블
+                        "#infoBottom, #productSpec, .prod_spec, .detail_info"); // 페이지별 ID/클래스
+        String category = null;
+        String kind     = null;
+        if(root != null){
+            // "...종류 " 아래에 있는 <td> 찾기
+            Element tdKindFirst = root.selectFirst(
+                    "tr > th.tit:matchesOwn(종\\s*류\\s*(?:[:：])?\\s*$) + td.dsc"
+            );
+            //첫번째 <td> 찾기
+            if (tdKindFirst != null) {
+                //상품 종류 파싱(위스키, 레드와인 등)
+                kind = tdKindFirst.text().trim();
+                if (kind.isEmpty()) kind = null;
+            }
+
+            //주종 찾기
+            Element tdCategory = root.selectFirst(
+                    "tr:has(> th.tit:matchesOwn(^\\s*주종\\s*$)) > td.dsc"
+            );
+            //상품 주종 파싱
+            if (tdCategory != null) {
+                category = tdCategory.text().trim();
+            }
+        }
+        ck.add(category); // index(2)
+        ck.add(kind); // index(1)
+        return ck;
+    }
+
+    /**
+     * 상품 가격 리스트 구하기<br>
+     * 쇼핑물, 쇼핑몰 아이콘, 가격, 배송비, 구매링크
+     * @param doc 파싱할 html
+     * @return 상품 가격 리스트 반환
+     */
+    public List<Price> getPrices(Document doc) {
+        List<Price> prices = new ArrayList<>();
+        for(Element element : doc.select("#lowPriceCompanyArea ul.list__mall-price li.list-item")) {
+            Price price = new Price();
+
+            //쇼핑몰 구하기
+            Element logoImg = element.selectFirst(".box__logo img.image[alt]");
+            if (logoImg != null) {
+                price.setShopName(logoImg.attr("alt").trim());
+                String icon = logoImg.attr("abs:src");
+                if (icon.isEmpty()) {
+                    icon = logoImg.attr("src");
+                    if (icon.startsWith("//")) icon = "https:" + icon;
+                }
+                price.setShopIcon(icon);
+            } else {
+                //텍스트 로고 처리(술픽 등)
+                Element textLogo = element.selectFirst(".box__logo .text__logo");
+                if (textLogo != null) {
+                    String name = textLogo.hasAttr("aria-label")
+                            ? textLogo.attr("aria-label").trim()
+                            : textLogo.text().trim();
+                    price.setShopName(name);
+                }
+                // 아이콘은 없음(null 허용)
+            }
+
+
+            //가격
+            Element priceNum = element.selectFirst(".box__price .sell-price .text__num");
+            if (priceNum != null) {
+                //숫자만 얻어오기
+                price.setPrice(parseNum(priceNum.text()));
+            }
+
+            //배송비
+            Element delivery = element.selectFirst(".box__delivery");
+            if (delivery != null) {
+                String d = delivery.text().trim();
+                //무료라고 적혀있으면 0, 배송비 끝 '원'제거하고 숫자로 저장
+                int fee = d.contains("무료") ? 0 : parseNum(d);
+                price.setDeliveryFee(fee);
+            }
+            //구매사이트
+            Element link = element.selectFirst("a.link__full-cover[href]");
+            if (link != null) {
+                //구매 링크 사이트 저장
+                price.setShopLink(link.attr("abs:href"));
+            }
+            prices.add(price);
+        }
+
+        return  prices;
     }
 
     /**

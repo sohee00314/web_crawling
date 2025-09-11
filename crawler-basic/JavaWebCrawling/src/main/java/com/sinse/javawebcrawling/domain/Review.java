@@ -26,7 +26,4 @@ public class Review {
     //리뷰내용
     @JsonProperty("content")
     private String content;
-    //리뷰 사진들
-    @JsonProperty("photo_list")
-    private List<String> photos = new ArrayList<>();
 }
