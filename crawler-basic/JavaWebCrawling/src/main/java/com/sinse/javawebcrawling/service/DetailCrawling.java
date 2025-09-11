@@ -37,13 +37,15 @@ public class DetailCrawling {
                 //상세페이지 ui 조사
                 Document doc = Jsoup.parse(html, "https://prod.danawa.com");
 
-                //상품 카테고리 및 종류 가져오기
+                //상품 카테고리 및 종류 ,정보 가져오기
                 String category = getCategory(doc).get(0);
                 String kind= getCategory(doc).get(1);
+                String content = getCategory(doc).get(2);
                 item.setCategory(category);
                 item.setProductKind(kind);
+                item.setContent(content);
 
-
+                log.debug(item.getContent());
                 //가격들을 저장할 리스트
                 List<Price> priceList = getPrices(doc);
                 item.setPrices(priceList);
@@ -125,13 +127,7 @@ public class DetailCrawling {
 
                 }
 
-
-//                List<WebElement> next = driver.findElements(By
-//                        .cssSelector(
-//                                "div.page_nav_area .nums_area .page_num.now_page + a.page_num, "
-//                                        + "div.page_nav_area a.nav_edge.nav_edge_next.nav_edge_on"));
-
-                //테스트용
+                //다음 리뷰페이지 전환 UI 모음
                 List<WebElement> next = driver.findElements(By
                         .cssSelector(
                                 "div.page_nav_area .nums_area .page_num.now_page + a.page_num"));
@@ -159,7 +155,10 @@ public class DetailCrawling {
     /**
      * 상품 주종과 종류를 파싱하기
      * @param doc 파싱을 html
-     * @return index(0)=category index(1)=kind인 String 리스트 반환
+     * @return index(0)=category<br>
+     * index(1)=kind<br>
+     * index(2)=content
+     * 인 String 리스트 반환
      */
     public List<String> getCategory(Document doc){
         List<String> ck = new ArrayList<>();
@@ -189,8 +188,29 @@ public class DetailCrawling {
                 category = tdCategory.text().trim();
             }
         }
-        ck.add(category); // index(2)
+
+        //상품정보 구하기
+        Element labelCell = doc.selectFirst(
+                "tr > td:has(b:matchesOwn(^\\s*제품\\s*설명\\s*$))"// <td><b>제품 설명</b>
+        );
+
+        String content = null;
+        if (labelCell != null) {
+            // 2) 같은 행(tr)에서 라벨 바로 다음 형제 td가 내용 셀
+            Element contentTd = labelCell.nextElementSibling();
+            if (contentTd != null && contentTd.tagName().equalsIgnoreCase("td")) {
+                // <p>가 여러 개면 줄바꿈으로 이어붙임
+                List<String> lines = contentTd.select("p").eachText();
+                content = lines.isEmpty() ? contentTd.text() : String.join("\n", lines);
+
+                // 과도한 공백 정리
+                content = content.replaceAll("\\s{2,}", " ").trim();
+            }
+        }
+
+        ck.add(category); // index(0)
         ck.add(kind); // index(1)
+        ck.add(content); // index(2)
         return ck;
     }
 
