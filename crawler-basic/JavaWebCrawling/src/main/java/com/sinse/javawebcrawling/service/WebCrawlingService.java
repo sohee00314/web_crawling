@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * html에서 원하는 데이터를 가져오는 서비스
@@ -89,13 +91,18 @@ public class WebCrawlingService {
 
         // 3. 상세페이지 링크 추출
         String detailLink = null;
+        int code = 0;
         Element linkElement = item.select("a[name=productName]").first();
         if (linkElement != null) {
             detailLink = linkElement.attr("href");
-            if (detailLink != null && !detailLink.startsWith("http")) {
+            if (!detailLink.startsWith("http")) {
                 detailLink = "https://prod.danawa.com" + detailLink;
+
             }
         }
+        //상세페이지 안에 있는 상품 코드 가져오기
+        Matcher m = Pattern.compile("[?&]pcode=(\\d+)").matcher(detailLink != null ? detailLink : "");
+        code = m.find() ? Integer.parseInt(m.group(1)) : 0;
 
         //카테고리 가져오기
         String category = null;
@@ -112,11 +119,10 @@ public class WebCrawlingService {
 
         // Product 객체 설정
         product.setProductName(productName);
+        product.setCode(code);
         product.setImageUrl(imageUrl);
         product.setDetailLink(detailLink);
         product.setCategory(category);
-
-
         return product;
     }
 
