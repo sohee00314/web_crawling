@@ -104,17 +104,6 @@ public class WebCrawlingService {
         Matcher m = Pattern.compile("[?&]pcode=(\\d+)").matcher(detailLink != null ? detailLink : "");
         code = m.find() ? Integer.parseInt(m.group(1)) : 0;
 
-        //카테고리 가져오기
-        String category = null;
-        Element categoryElement = item.select("div.spec_list").first();
-        if (categoryElement != null) {
-            for(TextNode textNode : categoryElement.textNodes()) {
-                if(!textNode.isBlank()){
-                    String all = categoryElement.text().trim();
-                    category = all.split("/")[0].trim();
-                }
-            }
-        }
 
 
         // Product 객체 설정
@@ -122,7 +111,6 @@ public class WebCrawlingService {
         product.setCode(code);
         product.setImageUrl(imageUrl);
         product.setDetailLink(detailLink);
-        product.setCategory(category);
         return product;
     }
 
