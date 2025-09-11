@@ -46,8 +46,6 @@ public class WebCrawlingService {
             try {
                 Product product = getProduct(item);
                 if (!product.getProductName().trim().isEmpty()) {
-//            log.debug("상품 추출 성공 - 상품명: {}, 카테고리 {}, 상세페이지: {}, 이미지: {}",
-//                    product.getProductName(),product.getCategory(),product.getDetailLink(),product.getImageUrl());
                     products.add(product);
                 }
             } catch (Exception e) {
