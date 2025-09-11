@@ -26,13 +26,24 @@ public class Product {
     //종류
     @JsonProperty("product_kind")
     private String productKind;
+    //설명
+    @JsonProperty("content")
+    private String content;
+    //도수
+    @JsonProperty("alcohol")
+    private int alcohol;
+    //용량
+    @JsonProperty("ml")
+    private int ml;
+    //구성
+    @JsonProperty("lineup")
+    private String lineup;
     //상세 링크
     @JsonProperty("detail_link")
     private String detailLink;
     //가격
     @JsonProperty("prices")
     private List<Price> prices = new ArrayList<>();
-
     //상품리뷰들
     @JsonProperty("review_list")
     private List<Review> reviews = new ArrayList<>();
