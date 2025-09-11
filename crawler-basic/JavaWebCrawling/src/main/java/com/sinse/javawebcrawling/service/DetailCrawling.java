@@ -37,6 +37,37 @@ public class DetailCrawling {
                 //상세페이지 ui 조사
                 Document doc = Jsoup.parse(html, "https://prod.danawa.com");
 
+                //상품 카테고리 및 종류 가져오기
+                Element root =
+                        doc.selectFirst("table:has(th:matchesOwn(^\\s*주종\\s*$)), " +   // '주종' th를 가진 테이블
+                                "#infoBottom, #productSpec, .prod_spec, .detail_info"); // 페이지별 ID/클래스
+                String category = null;
+                String kind     = null;
+                if(root != null){
+                    // "양주 종류 " 아래에 있는 <td> 찾기
+                    Element tdKindFirst = root.selectFirst(
+                            "tr > th.tit:matchesOwn(^\\s*양주\\s*종류\\s*$) + td.dsc"
+                    );
+                    //첫번째 <td> 찾기
+                    if (tdKindFirst != null) {
+                        //상품 종류 파싱(위스키, 레드와인 등)
+                        kind = tdKindFirst.text().trim();
+                        if (kind.isEmpty()) kind = null;
+                    }
+
+                    //주종 찾기
+                    Element tdCategory = root.selectFirst(
+                            "tr:has(> th.tit:matchesOwn(^\\s*주종\\s*$)) > td.dsc"
+                    );
+                    //상품 주종 파싱
+                    if (tdCategory != null) {
+                        category = tdCategory.text().trim();
+                    }
+                }
+                item.setCategory(category);
+                item.setProductKind(kind);
+
+
                 //가격들을 저장할 리스트
                 List<Price> priceList = new ArrayList<>();
                 //가격들이 있는 class 조회
@@ -54,7 +85,7 @@ public class DetailCrawling {
                         }
                         price.setShopIcon(icon);
                     } else {
-                        // [FIX] 텍스트 로고 처리(술픽 등)
+                        //텍스트 로고 처리(술픽 등)
                         Element textLogo = element.selectFirst(".box__logo .text__logo");
                         if (textLogo != null) {
                             String name = textLogo.hasAttr("aria-label")
@@ -64,6 +95,7 @@ public class DetailCrawling {
                         }
                         // 아이콘은 없음(null 허용)
                     }
+
 
                     //가격
                     Element priceNum = element.selectFirst(".box__price .sell-price .text__num");
@@ -93,7 +125,6 @@ public class DetailCrawling {
 
             //리뷰페이지 넘아기기 반복문 후 파싱
             item.setReviews(getReviews(driver,html));
-            log.debug("리뷰목록 {}",item.getReviews());
 
 
         }
@@ -103,6 +134,12 @@ public class DetailCrawling {
         return item;
     }
 
+    /**
+     * 상품 리뷰 데이터 구하기
+     * @param driver 상품목록 때 사용한 driver 재사용
+     * @param html 상품상세페이지 html
+     * @return 리부리스트 반환
+     */
     public List<Review> getReviews(WebDriver driver,String html) {
         List<Review> reviews = new ArrayList<>();
         while (true){
@@ -199,6 +236,10 @@ public class DetailCrawling {
         return reviews;
     }
 
+    public Product getCategory(Document doc){
+        return null;
+    }
+
     /**
      * 문자열에 포함되여 있는 숫자를 반환하기
      * @param s 숫자가 포함되여 있는 문자열
@@ -208,4 +249,5 @@ public class DetailCrawling {
         String digits = s.replaceAll("[^0-9]", "");
         return digits.isEmpty() ? 0 : Integer.parseInt(digits);
     }
+
 }
