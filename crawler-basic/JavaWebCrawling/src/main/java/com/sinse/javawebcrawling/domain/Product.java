@@ -32,6 +32,9 @@ public class Product {
     //용량
     @JsonProperty("ml")
     private int ml;
+    //포장상태
+    @JsonProperty("packaging")
+    private String packaging;
     //구성
     @JsonProperty("lineup")
     private String lineup;
