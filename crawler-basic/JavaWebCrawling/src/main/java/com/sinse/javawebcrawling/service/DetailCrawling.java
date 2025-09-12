@@ -42,6 +42,12 @@ public class DetailCrawling {
                 //상품정보 가져오기
                 item.setContent(isContent(doc));
 
+                //상품의 도수, 포장상태 가져오기
+                String packaging = isSpecList(doc).get(0);
+                String alcohol = isSpecList(doc).get(1);
+                item.setPackaging(packaging);
+                item.setAlcohol(Integer.parseInt(alcohol));
+
                 //상품 카테고리 및 종류 ,정보 가져오기
                 String category = getCategory(doc).get(0);
                 String kind= getCategory(doc).get(1);
@@ -260,7 +266,7 @@ public class DetailCrawling {
 
     /**
      * 상품정보 구하기
-     * @param doc 파싱한 html 정보
+     * @param doc 파싱 할 html 정보
      * @return String content 반환
      */
     public String isContent(Document doc) {
@@ -287,6 +293,49 @@ public class DetailCrawling {
             }
         }
         return content;
+    }
+
+    /**
+     * div.spec_list 안에 있는 정보 파싱하기<br>
+     * index(0)= 포장상태
+     * index(1)= 도수
+     * @param doc 파싱 할 html 정보
+     * @return 리스트 반환
+     */
+    public List<String> isSpecList(Document doc) {
+        List<String> specList = new ArrayList<>();
+        Element spec= doc.selectFirst("div.spec_list");
+        if (spec != null) {
+            String htmlText = spec.html();
+
+            // 포장형태 추출 - "포장형태</u></span>:" 다음에 오는 <u> 태그 내용
+            Pattern packagingPattern = Pattern.compile(
+                    "포장형태</u></span>:\\s*<span>\\s*<u>([^<]+)</u>",
+                    Pattern.CASE_INSENSITIVE
+            );
+            Matcher packagingMatcher = packagingPattern.matcher(htmlText);
+
+            if (packagingMatcher.find()) {
+                String packaging = packagingMatcher.group(1).trim();
+                specList.add(packaging);
+                log.debug("포장형태 추출: {}", packaging);
+            }
+
+            // 도수 추출 - "도수: X도" 형태에서 숫자만 추출
+            Pattern alcoholPattern = Pattern.compile(
+                    "<u>도수:\\s*(\\d+)도</u>",
+                    Pattern.CASE_INSENSITIVE
+            );
+            Matcher alcoholMatcher = alcoholPattern.matcher(htmlText);
+
+            if (alcoholMatcher.find()) {
+                String alcohol = alcoholMatcher.group(1);
+                specList.add(alcohol);
+                log.debug("도수 추출: {}도", alcohol);
+            }
+        }
+
+        return specList;
     }
 
     /**
