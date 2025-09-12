@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +45,17 @@ public class DetailCrawling {
                 item.setContent(isContent(doc));
 
                 //상품의 도수, 포장상태 가져오기
+                Map<String,String> map = isMap(doc);
+                if(map != null){
+                    String packaging = map.get("packaging");
+                    item.setPackaging(packaging);
 
+                    String alcohol = map.get("alcohol");
+                    if(alcohol == null){
+                        item.setAlcohol(0);
+                    } else {item.setAlcohol(Integer.parseInt(alcohol));}
+
+                }
                 log.debug("상품명 {}, 포장상태 {}. 도수 {}도",item.getProductName(),item.getPackaging(),item.getAlcohol());
 
                 //상품 카테고리 및 종류 ,정보 가져오기
@@ -300,38 +312,43 @@ public class DetailCrawling {
      * @param doc 파싱 할 html 정보
      * @return 리스트 반환
      */
-    public List<String> isSpecList(Document doc) {
-        List<String> specList = new ArrayList<>();
-        Element spec= doc.selectFirst("div.spec_list");
-        if (spec != null) {
-            String htmlText = spec.html();
+    public Map<String,String> isMap(Document doc) {
+        Map<String,String> result = new HashMap<>();
 
-            // 포장형태 추출 - "포장형태</u></span>:" 다음에 오는 <u> 태그 내용
-            Pattern packagingPattern = Pattern.compile(
-                    "포장형태</u></span>:\\s*<span>\\s*<u>([^<]+)</u>",
-                    Pattern.CASE_INSENSITIVE
-            );
-            Matcher packagingMatcher = packagingPattern.matcher(htmlText);
-            String packaging = null;
-            if (packagingMatcher.find()) {
-                packaging = packagingMatcher.group(1).trim();
-                specList.add(packaging);
+        // 다양한 위치를 한 번에 커버 (items, spec_list, h_area, spec_set 등)
+        Element container = doc.selectFirst(
+                ".spec_list, .items, .h_area, .spec_set, .spec_set_wrap, #infoBottom, #productSpec, .prod_spec, .detail_info"
+        );
+
+        // 기본값: 못 찾으면 null
+        String packaging = null;
+        String alcohol   = null;
+
+        if (container != null) {
+            // 태그 구조가 제각각이라 안전하게 '텍스트'에서 정규식으로 추출
+            String text = container.text();
+
+            // 포장형태: "포장형태 : 페트" / "포장형태:페트" 등 변형 대응
+            // 한글/영문/숫자/슬래시/하이픈/언더스코어 정도까지 허용
+            Matcher pkgM = Pattern.compile("포장형태\\s*[:：]?\\s*([가-힣A-Za-z0-9/_\\-]+)")
+                    .matcher(text);
+            if (pkgM.find()) {
+                packaging = pkgM.group(1).trim();
+                if (packaging.isEmpty()) packaging = null;
             }
 
-            // 도수 추출 - "도수: X도" 형태에서 숫자만 추출
-            Pattern alcoholPattern = Pattern.compile(
-                    "<u>\\s*도수\\s*:\\s*(\\d+)\\s*(?:도|%)\\s*</u>",
-                    Pattern.CASE_INSENSITIVE
-            );
-            Matcher alcoholMatcher = alcoholPattern.matcher(htmlText);
-            String alcohol = null;
-            if (alcoholMatcher.find()) {
-                alcohol = alcoholMatcher.group(1);
-                specList.add(alcohol);
+            // 도수: "도수: 6도" / "도수: 16%" 등 변형 대응 (숫자만 뽑기)
+            Matcher alcM = Pattern.compile("도수\\s*[:：]?\\s*([0-9]{1,3})\\s*(?:도|%)")
+                    .matcher(text);
+            if (alcM.find()) {
+                alcohol = alcM.group(1).trim(); // 숫자만
+                if (alcohol.isEmpty()) alcohol = null;
             }
         }
 
-        return specList;
+        result.put("packaging", packaging);
+        result.put("alcohol",   alcohol);
+        return result;
     }
 
     /**
