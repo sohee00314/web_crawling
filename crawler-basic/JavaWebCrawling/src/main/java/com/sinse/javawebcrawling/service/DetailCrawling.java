@@ -43,13 +43,6 @@ public class DetailCrawling {
                 item.setContent(isContent(doc));
 
                 //상품의 도수, 포장상태 가져오기
-                String packaging = isSpecList(doc).get(0);
-                String alcohol = isSpecList(doc).get(1);
-                //도수가 없을 경우 0으로 처리
-                if(alcohol != null){
-                    item.setAlcohol(Integer.parseInt(alcohol));
-                }else {item.setAlcohol(0);}
-                item.setPackaging(packaging);
 
                 log.debug("상품명 {}, 포장상태 {}. 도수 {}도",item.getProductName(),item.getPackaging(),item.getAlcohol());
 
