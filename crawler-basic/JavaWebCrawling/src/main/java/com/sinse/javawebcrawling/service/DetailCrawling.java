@@ -342,30 +342,8 @@ public class DetailCrawling {
                     .matcher(text);
             if (alcM.find()) {
                 alcohol = alcM.group(1).trim(); // 숫자만
+                if (alcohol.isEmpty()) alcohol = null;
             }
-                if (alcohol.isEmpty()){
-                    alcM = null;
-                    Double maxAbv = null;
-
-                    alcM = Pattern.compile("구성\\s*[:：]?\\s*([^\\n]*)", Pattern.CASE_INSENSITIVE)
-                            .matcher(text);
-                    Pattern abvInConfig = Pattern.compile("(\\d{1,3}(?:\\.\\d+)?)\\s*(?:도|%)", Pattern.CASE_INSENSITIVE);
-                    while (alcM.find()){
-                        String seg = alcM.group(1);
-                        Matcher inConf = abvInConfig.matcher(seg);
-                        while (inConf.find()){
-                            try {
-                                double v = Double.parseDouble(inConf.group(1));
-                                if (maxAbv == null || v > maxAbv) maxAbv = v;
-                            } catch (NumberFormatException ignore) { log.debug("도수를 찾을 수 없음"); }
-                        }
-                    }
-                    if (maxAbv != null) {
-                        alcohol = String.valueOf((int) Math.round(maxAbv)); // 예: 24.5% → "24"로 반올림
-                    } else {
-                        alcohol = null;
-                    }
-                }
         }
 
         result.put("packaging", packaging);
