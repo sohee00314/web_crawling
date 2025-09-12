@@ -45,8 +45,13 @@ public class DetailCrawling {
                 //상품의 도수, 포장상태 가져오기
                 String packaging = isSpecList(doc).get(0);
                 String alcohol = isSpecList(doc).get(1);
+                //도수가 없을 경우 0으로 처리
+                if(alcohol != null){
+                    item.setAlcohol(Integer.parseInt(alcohol));
+                }else {item.setAlcohol(0);}
                 item.setPackaging(packaging);
-                item.setAlcohol(Integer.parseInt(alcohol));
+
+                log.debug("상품명 {}, 포장상태 {}. 도수 {}도",item.getProductName(),item.getPackaging(),item.getAlcohol());
 
                 //상품 카테고리 및 종류 ,정보 가져오기
                 String category = getCategory(doc).get(0);
@@ -297,7 +302,7 @@ public class DetailCrawling {
 
     /**
      * div.spec_list 안에 있는 정보 파싱하기<br>
-     * index(0)= 포장상태
+     * index(0)= 포장상태 <br>
      * index(1)= 도수
      * @param doc 파싱 할 html 정보
      * @return 리스트 반환
@@ -314,24 +319,22 @@ public class DetailCrawling {
                     Pattern.CASE_INSENSITIVE
             );
             Matcher packagingMatcher = packagingPattern.matcher(htmlText);
-
+            String packaging = null;
             if (packagingMatcher.find()) {
-                String packaging = packagingMatcher.group(1).trim();
+                packaging = packagingMatcher.group(1).trim();
                 specList.add(packaging);
-                log.debug("포장형태 추출: {}", packaging);
             }
 
             // 도수 추출 - "도수: X도" 형태에서 숫자만 추출
             Pattern alcoholPattern = Pattern.compile(
-                    "<u>도수:\\s*(\\d+)도</u>",
+                    "<u>\\s*도수\\s*:\\s*(\\d+)\\s*(?:도|%)\\s*</u>",
                     Pattern.CASE_INSENSITIVE
             );
             Matcher alcoholMatcher = alcoholPattern.matcher(htmlText);
-
+            String alcohol = null;
             if (alcoholMatcher.find()) {
-                String alcohol = alcoholMatcher.group(1);
+                alcohol = alcoholMatcher.group(1);
                 specList.add(alcohol);
-                log.debug("도수 추출: {}도", alcohol);
             }
         }
 
