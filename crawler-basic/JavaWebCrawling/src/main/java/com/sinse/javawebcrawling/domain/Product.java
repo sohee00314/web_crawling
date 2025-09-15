@@ -30,8 +30,8 @@ public class Product {
     @JsonProperty("alcohol")
     private int alcohol;
     //용량
-    @JsonProperty("ml")
-    private int ml;
+    @JsonProperty("volume")
+    private int volume;
     //포장상태
     @JsonProperty("packaging")
     private String packaging;
