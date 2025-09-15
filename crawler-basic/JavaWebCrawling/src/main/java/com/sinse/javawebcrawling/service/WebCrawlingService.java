@@ -39,6 +39,8 @@ public class WebCrawlingService {
             productItems = doc.select("div.prod_main_info");
         }
 
+
+
         //더 이상 찾을 수 없으면 상품 리스트 리턴
         if(productItems.isEmpty()){
             log.debug("No products found");
@@ -92,7 +94,6 @@ public class WebCrawlingService {
                     product.setLineup(lineup);
                 }
             }
-            log.debug("상품명 {}, 용량 {}, 구성{}", productName, volume, lineup);
         }
 
         // 2. 상품 이미지 추출
@@ -120,6 +121,22 @@ public class WebCrawlingService {
         Matcher m = Pattern.compile("[?&]pcode=(\\d+)").matcher(detailLink != null ? detailLink : "");
         code = m.find() ? Integer.parseInt(m.group(1)) : 0;
 
+        //도수랑 포장상태를 추출
+        // 다양한 위치를 한 번에 커버 (items, spec_list, h_area, spec_set 등)
+        Element container = item.selectFirst(
+                ".spec_list"
+        );
+        Map<String,String> map2 = isMap(container);
+        if (map2 != null) {
+            String packaging =  map2.get("packaging");
+            if (packaging != null) {
+                product.setPackaging(packaging);
+            }
+            String alcohol = map2.get("alcohol");
+            if (alcohol != null) {
+                product.setAlcohol(Integer.parseInt(alcohol));
+            }
+        }
 
 
         // Product 객체 설정
@@ -159,8 +176,8 @@ public class WebCrawlingService {
             map.put("volume", volume);
         }
 
-        //상품명에서 구성(1개, 1입) 얻어오기
-        Pattern lineupPattern = Pattern.compile("(\\d+)\\s*(?:개|입)");
+        //상품명에서 구성(1개, 1입,1구) 얻어오기
+        Pattern lineupPattern = Pattern.compile("(\\d+)\\s*[개입구]");
         Matcher lineupMatcher = lineupPattern.matcher(productName);
 
         if (lineupMatcher.find()) {
@@ -173,6 +190,45 @@ public class WebCrawlingService {
         }
 
         return  map;
+    }
+
+    /**
+     * div.spec_list 안에 있는 정보 파싱하기<br>
+     * @param container 파싱할 영역
+     * @return packaging= 포장상태 alcohol= 도수<br> Map 반환
+     */
+    public Map<String,String> isMap(Element container) {
+        Map<String,String> result = new HashMap<>();
+
+        // 기본값: 못 찾으면 null
+        String packaging = null;
+        String alcohol   = null;
+
+        if (container != null) {
+            // 태그 구조가 제각각이라 안전하게 '텍스트'에서 정규식으로 추출
+            String text = container.text();
+
+            // 포장형태: "포장형태 : 페트" / "포장형태:페트" 등 변형 대응
+            // 한글/영문/숫자/슬래시/하이픈/언더스코어 정도까지 허용
+            Matcher pkgM = Pattern.compile("포장형태\\s*[:：]?\\s*([가-힣A-Za-z0-9/_\\-]+)")
+                    .matcher(text);
+            if (pkgM.find()) {
+                packaging = pkgM.group(1).trim();
+                if (packaging.isEmpty()) packaging = null;
+            }
+
+            // 도수: "도수: 6도" / "도수: 16%" 등 변형 대응 (숫자만 뽑기)
+            Matcher alcM = Pattern.compile("도수\\s*[:：]?\\s*([0-9]{1,3})\\s*(?:도|%)")
+                    .matcher(text);
+            if (alcM.find()) {
+                alcohol = alcM.group(1).trim(); // 숫자만
+                if (alcohol.isEmpty()) alcohol = null;
+            }
+        }
+
+        result.put("packaging", packaging);
+        result.put("alcohol",   alcohol);
+        return result;
     }
 
 }
