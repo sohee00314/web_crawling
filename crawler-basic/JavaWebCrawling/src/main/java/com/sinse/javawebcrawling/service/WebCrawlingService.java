@@ -8,7 +8,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,9 +22,8 @@ public class WebCrawlingService {
      * Proudct에서 정의한 데이테 List에 저장
       * @param html 웹사이트 html
      * @return List 반환
-     * @throws IOException 에러 정의
      */
-    public List<Product> crawler(String html) throws IOException {
+    public List<Product> crawler(String html){
         //상품을 저장할 리스트
         List<Product> products = new ArrayList<>();
         //크롤링할 웹사이트 html
@@ -72,8 +70,8 @@ public class WebCrawlingService {
 
         // 1. 상품명 추출 (브랜드 + 상품명)과 상품명에 있는 용량과 구성 추출
         String productName = null;
-        String volume = null;
-        String lineup = null;
+        String volume;
+        String lineup;
 
         Element titleElement = item.select("a[name=productName]").first();
         if (titleElement != null) {
@@ -98,14 +96,14 @@ public class WebCrawlingService {
         Element imgElement = item.select("div.thumb_image a.thumb_link img").first();
         if (imgElement != null) {
             imageUrl = imgElement.attr("src");
-            if (imageUrl != null && imageUrl.startsWith("//")) {
+            if (imageUrl.startsWith("//")) {
                 imageUrl = "https:" + imageUrl;
             }
         }
 
         // 3. 상세페이지 링크 추출
         String detailLink = null;
-        int code = 0;
+        int code;
         Element linkElement = item.select("a[name=productName]").first();
         if (linkElement != null) {
             detailLink = linkElement.attr("href");
@@ -152,7 +150,7 @@ public class WebCrawlingService {
     public Map<String,String> usedName(String productName){
         Map<String,String> map = new HashMap<>();
         String volume = null;
-        String lineup = null;
+        String lineup;
 
         //상품명에 있는 ml,l 찾기
         Pattern volumePattern = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*[mM][lL]|(\\d+(?:\\.\\d+)?)\\s*[lL]");
@@ -215,14 +213,14 @@ public class WebCrawlingService {
             }
 
             // 도수: "도수: 6도" / "도수: 16%" 등 변형 대응 (숫자만 뽑기)
-            Matcher alcM = Pattern.compile("도수\\s*[:：]?\\s*([0-9]{1,3})\\s*(?:도|%)")
+            Matcher alcM = Pattern.compile("도수\\s*[:：]?\\s*([0-9]{1,3})\\s*[도%]")
                     .matcher(text);
             if (alcM.find()) {
                 alcohol = alcM.group(1).trim(); // 숫자만
                 if (alcohol.isEmpty()) alcohol = null;
             }
 
-            Matcher listM = Pattern.compile("구성\\s*[:：]?\\s*([^\\r\\n]+)").matcher(text);;
+            Matcher listM = Pattern.compile("구성\\s*[:：]?\\s*([^\\r\\n]+)").matcher(text);
             if (listM.find()) {
                 String tt = listM.group(1).trim();
                 if(alcohol == null){
