@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,6 +114,19 @@ public class WebCrawlingService {
         product.setImageUrl(imageUrl);
         product.setDetailLink(detailLink);
         return product;
+    }
+
+    /**
+     * 상품명에 포함되여 있는 용량(mL,L)와 구성(2개, 2입)을 파싱하기
+     * @param productName 상품명
+     * @return  volume(용량), lineup(구성)<br> Map 반환
+     */
+    public Map<String,String> usedName(String productName){
+        Map<String,String> map = new HashMap<>();
+        String volume = null;
+        String lineup = null;
+
+        return  null;
     }
 
 }
