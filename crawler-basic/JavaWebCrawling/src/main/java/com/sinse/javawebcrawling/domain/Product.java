@@ -28,7 +28,7 @@ public class Product {
     private String content;
     //도수
     @JsonProperty("alcohol")
-    private int alcohol;
+    private double alcohol;
     //용량
     @JsonProperty("volume")
     private int volume;
