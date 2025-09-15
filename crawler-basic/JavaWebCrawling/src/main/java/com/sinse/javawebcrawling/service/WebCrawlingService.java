@@ -72,13 +72,28 @@ public class WebCrawlingService {
     private Product getProduct(Element item) {
         Product product = new Product();
 
-
-
-        // 1. 상품명 추출 (브랜드 + 상품명)
+        // 1. 상품명 추출 (브랜드 + 상품명)과 상품명에 있는 용량과 구성 추출
         String productName = null;
+        String volume = null;
+        String lineup = null;
+
         Element titleElement = item.select("a[name=productName]").first();
         if (titleElement != null) {
             productName = titleElement.text().trim();
+
+            //용량과 구성이 있는 Map 호출
+            Map<String,String> map = usedName(productName);
+            if (map != null) {
+                volume = map.get("volume");
+                if (volume != null) {
+                    product.setVolume(Integer.parseInt(volume));
+                }
+                lineup = map.get("lineup");
+                if (lineup != null) {
+                    product.setLineup(lineup);
+                }
+            }
+            log.debug("상품명 {}, 용량 {}, 구성{}", productName, volume, lineup);
         }
 
         // 2. 상품 이미지 추출
@@ -126,7 +141,39 @@ public class WebCrawlingService {
         String volume = null;
         String lineup = null;
 
-        return  null;
+        //상품명에 있는 ml,l 찾기
+        Pattern volumePattern = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*[mM][lL]|(\\d+(?:\\.\\d+)?)\\s*[lL]");
+        Matcher volumeMatcher = volumePattern.matcher(productName);
+
+        if (volumeMatcher.find()) {
+            String volumeStr = volumeMatcher.group(1) != null ? volumeMatcher.group(1) : volumeMatcher.group(2);
+            try {
+                double volumeDouble = Double.parseDouble(volumeStr);
+                // L 단위인 경우 ml로 변환
+                if (volumeMatcher.group(0).toLowerCase().contains("l") && !volumeMatcher.group(0).toLowerCase().contains("ml")) {
+                    volumeDouble *= 1000; // L를 ml로 변환
+                }
+                volume = String.valueOf((int) volumeDouble);
+            } catch (NumberFormatException e) {
+                log.debug("용량 파싱 실패: {}", volumeStr);
+            }
+            map.put("volume", volume);
+        }
+
+        //상품명에서 구성(1개, 1입) 얻어오기
+        Pattern lineupPattern = Pattern.compile("(\\d+)\\s*(?:개|입)");
+        Matcher lineupMatcher = lineupPattern.matcher(productName);
+
+        if (lineupMatcher.find()) {
+            try {
+                lineup = lineupMatcher.group(1)+" 개";
+                map.put("lineup", lineup);
+            } catch (NumberFormatException e) {
+                log.debug("개수 파싱 실패: {}", lineupMatcher.group(1));
+            }
+        }
+
+        return  map;
     }
 
 }
