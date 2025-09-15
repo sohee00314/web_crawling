@@ -84,7 +84,7 @@ public class CrawlerService {
                         p.setProductKind(product.getProductKind()); // 종류
                         p.setContent(product.getContent()); //상품정보
                         p.setAlcohol(product.getAlcohol()); //도수
-                        p.setMl(product.getMl()); // 용량
+                        p.setVolume(product.getVolume()); // 용량
                         p.setLineup(product.getLineup()); // 구성
                         p.setPrices(product.getPrices()); // 상품 가격리스트
                         p.setReviews(product.getReviews()); // 상품 리뷰 리스트
