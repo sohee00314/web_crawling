@@ -9,10 +9,7 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -134,7 +131,7 @@ public class WebCrawlingService {
             }
             String alcohol = map2.get("alcohol");
             if (alcohol != null) {
-                product.setAlcohol(Integer.parseInt(alcohol));
+                product.setAlcohol(Double.parseDouble(alcohol));
             }
         }
 
@@ -224,10 +221,31 @@ public class WebCrawlingService {
                 alcohol = alcM.group(1).trim(); // 숫자만
                 if (alcohol.isEmpty()) alcohol = null;
             }
+
+            Matcher listM = Pattern.compile("구성\\s*[:：]?\\s*([^\\r\\n]+)").matcher(text);;
+            if (listM.find()) {
+                String tt = listM.group(1).trim();
+                if(alcohol == null){
+                    Pattern p = Pattern.compile("((?:[1-9]?\\d|100)(?:\\.\\d{1,2})?)\\s*[도%]");
+                    Matcher m = p.matcher(tt);
+
+                    // 모든 매치 순회하며 최댓값 계산
+                    double max = Double.NEGATIVE_INFINITY;
+                    while (m.find()) {
+                        double v = Double.parseDouble(m.group(1));
+                        if (v > max) max = v;
+                    }
+
+                    if (max != Double.NEGATIVE_INFINITY) {
+                        alcohol = (Math.floor(max) == max) ? Integer.toString((int) max) : Double.toString(max);
+                        log.debug("도수 {}도", alcohol);
+                    }
+                }
+            }
         }
 
-        result.put("packaging", packaging);
-        result.put("alcohol",   alcohol);
+        result.put("packaging",packaging);
+        result.put("alcohol",alcohol);
         return result;
     }
 
