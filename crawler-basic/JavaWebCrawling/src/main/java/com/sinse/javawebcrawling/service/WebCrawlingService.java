@@ -83,6 +83,9 @@ public class WebCrawlingService {
                 return null;
             }
 
+            //상품브랜드 메서드 호출
+            brand = getBrand(productName);
+
             //용량과 구성이 있는 Map 호출
             Map<String,String> map = usedName(productName);
             if (map != null) {
