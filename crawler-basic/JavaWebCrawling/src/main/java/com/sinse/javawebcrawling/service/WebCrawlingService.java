@@ -196,7 +196,7 @@ public class WebCrawlingService {
     /**
      * div.spec_list 안에 있는 정보 파싱하기<br>
      * @param container 파싱할 영역
-     * @return packaging= 포장상태 alcohol= 도수<br> Map 반환
+     * @return packaging= 포장상태 alcohol= 도수 volume = 용량<br> Map 반환
      */
     public Map<String,String> isMap(Element container) {
         Map<String,String> result = new HashMap<>();
