@@ -291,6 +291,7 @@ public class WebCrawlingService {
         for (String keyword : excludeKeywords) {
             //제외키워드가 포함되여 있는 여부 확인
             if (productName.contains(keyword)) {
+                log.debug("상품명 {}은 {}를 반견해서 제외됨", productName, keyword);
                 return true;
             }
         }
