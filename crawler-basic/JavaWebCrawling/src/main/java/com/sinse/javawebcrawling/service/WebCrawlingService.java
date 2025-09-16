@@ -314,6 +314,10 @@ public class WebCrawlingService {
 
     public String getBrand(String productName) {
         String brand = null;
+        //상품멱에 공백제거
+        String chackName = productName.trim();
+
+
         return  brand;
     }
 
