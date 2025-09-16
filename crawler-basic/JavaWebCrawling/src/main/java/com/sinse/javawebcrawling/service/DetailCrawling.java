@@ -259,6 +259,7 @@ public class DetailCrawling {
                 //구매 링크 사이트 저장
                 String url = link.attr("href");
                 String shopLink = finalUrlResolver.resolveUrl(url);
+                log.debug("상품 최종 구매 링크 {}",shopLink);
                 price.setShopLink(shopLink);
             }
             prices.add(price);
