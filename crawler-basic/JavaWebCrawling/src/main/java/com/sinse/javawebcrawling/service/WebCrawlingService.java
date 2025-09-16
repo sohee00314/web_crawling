@@ -287,7 +287,13 @@ public class WebCrawlingService {
     public boolean checkProductName(String productName) {
         //제외시킬 키워드 배열
         String[] excludeKeywords = {"키트", "세트"};
-
+        //제외 키워드의 수만큼 반복
+        for (String keyword : excludeKeywords) {
+            //제외키워드가 포함되여 있는 여부 확인
+            if (productName.contains(keyword)) {
+                return true;
+            }
+        }
         return false;
     }
 
