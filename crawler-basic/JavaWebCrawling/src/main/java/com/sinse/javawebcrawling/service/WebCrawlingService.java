@@ -312,6 +312,11 @@ public class WebCrawlingService {
         return false;
     }
 
+    /**
+     * 상품명 앞부분에 있는 브랜드 추출하기는 메스드
+     * @param productName 얻어온 상품명
+     * @return brand 반환
+     */
     public String getBrand(String productName) {
         String brand = null;
         //상품멱에 공백제거
