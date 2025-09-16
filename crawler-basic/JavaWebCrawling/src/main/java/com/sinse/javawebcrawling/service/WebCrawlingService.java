@@ -294,6 +294,11 @@ public class WebCrawlingService {
                 return true;
             }
         }
+
+        //숫자+호, (숫자)호 모두 찾기
+        if (Pattern.compile("(?:\\(\\d+\\)|\\d+)호").matcher(productName).find()) {
+            return true;
+        }
         return false;
     }
 
