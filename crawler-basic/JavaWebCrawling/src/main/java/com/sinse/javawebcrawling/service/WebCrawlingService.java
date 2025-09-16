@@ -248,12 +248,15 @@ public class WebCrawlingService {
                         alcohol = (Math.floor(max) == max) ? Integer.toString((int) max) : Double.toString(max);
                     }
                 }
+
+                //추출한 문자열에서 ml,l,L,ML 등 용량 단위 찾아서 앞에 있는 문자 추출
                 Pattern volumePattern = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(?:ml|ML|mL|Ml|리터|ℓ|L|l)");
                 Matcher volumeMatcher = volumePattern.matcher(tt);
                 // 모든 용량 매치를 순회하면서 최댓값 찾기
                 while (volumeMatcher.find()) {
                     log.debug("발견된 용량 매치: {}", volumeMatcher.group(0));
 
+                    //문자열을 숫자(소주점까지)으로 변환
                     double v = Double.parseDouble(volumeMatcher.group(1));
 
                     // 전체 매치된 텍스트에서 단위 확인
@@ -267,8 +270,10 @@ public class WebCrawlingService {
                         v = v * 1000; // 리터를 ml로 변환
                         volumeInMl= (int) v;
                     }else {
+                        //ml면 그대로 대입
                         volumeInMl =(int) v;
                     }
+                    //숫자를 다시 문자열로 변환
                     volume= String.valueOf(volumeInMl);
                 }
             }
