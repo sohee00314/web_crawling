@@ -72,6 +72,7 @@ public class WebCrawlingService {
         String productName = null;
         String volume = null;
         String lineup;
+        String brand = null;
 
         Element titleElement = item.select("a[name=productName]").first();
         if (titleElement != null) {
