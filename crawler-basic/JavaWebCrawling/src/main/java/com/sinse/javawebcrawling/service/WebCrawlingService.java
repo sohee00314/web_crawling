@@ -70,7 +70,7 @@ public class WebCrawlingService {
 
         // 1. 상품명 추출 (브랜드 + 상품명)과 상품명에 있는 용량과 구성 추출
         String productName = null;
-        String volume;
+        String volume = null;
         String lineup;
 
         Element titleElement = item.select("a[name=productName]").first();
@@ -130,6 +130,13 @@ public class WebCrawlingService {
             String alcohol = map2.get("alcohol");
             if (alcohol != null) {
                 product.setAlcohol(Double.parseDouble(alcohol));
+            }
+            if(volume== null){
+                String v = map2.get("vloume");
+                if (v != null) {
+                    product.setVolume(Integer.parseInt(v));
+                    log.debug(" 구성 안에 있는 용량 {} ml",Integer.valueOf(v));
+                }
             }
         }
 
@@ -236,8 +243,26 @@ public class WebCrawlingService {
 
                     if (max != Double.NEGATIVE_INFINITY) {
                         alcohol = (Math.floor(max) == max) ? Integer.toString((int) max) : Double.toString(max);
-                        log.debug("도수 {}도", alcohol);
                     }
+                }
+                Pattern volumePattern = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(?:ml|ML|mL|Ml|리터|ℓ|L|l)");
+                Matcher volumeMatcher = volumePattern.matcher(tt);
+                // 모든 용량 매치를 순회하면서 최댓값 찾기
+                while (volumeMatcher.find()) {
+                    //숫자 부분만 추출하여 double로 변환
+                    double v = Double.parseDouble(volumeMatcher.group(1));
+
+                    // 전체 매치된 텍스트에서 단위 확인
+                    String fullMatch = volumeMatcher.group(0);
+                    //숫자와 공백 부분을 제거하여 단위만 남김
+                    String unit = fullMatch.replaceAll("\\d+(?:\\.\\d+)?\\s*", "").toLowerCase();
+
+                    // 리터 단위를 ml로 변환 (1L = 1000ml)
+                    double volumeInMl = v;
+                    if (unit.equals("리터") || unit.equals("ℓ") || unit.equals("l")) {
+                        volumeInMl = v * 1000; // 리터를 ml로 변환
+                    }
+                    result.put("volum", String.valueOf(volumeInMl));
                 }
             }
         }
