@@ -249,7 +249,8 @@ public class WebCrawlingService {
                 Matcher volumeMatcher = volumePattern.matcher(tt);
                 // 모든 용량 매치를 순회하면서 최댓값 찾기
                 while (volumeMatcher.find()) {
-                    //숫자 부분만 추출하여 double로 변환
+                    log.debug("발견된 용량 매치: {}", volumeMatcher.group(0));
+
                     double v = Double.parseDouble(volumeMatcher.group(1));
 
                     // 전체 매치된 텍스트에서 단위 확인
