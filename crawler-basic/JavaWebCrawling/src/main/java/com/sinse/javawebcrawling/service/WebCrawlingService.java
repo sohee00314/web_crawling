@@ -204,6 +204,7 @@ public class WebCrawlingService {
 
         String packaging = null;
         String alcohol   = null;
+        String volume = null;
 
         if (container != null) {
             // 태그 구조가 제각각이라 안전하게 '텍스트'에서 정규식으로 추출
