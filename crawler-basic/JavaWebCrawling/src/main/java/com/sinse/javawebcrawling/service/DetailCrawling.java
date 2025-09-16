@@ -3,6 +3,8 @@ package com.sinse.javawebcrawling.service;
 import com.sinse.javawebcrawling.domain.Price;
 import com.sinse.javawebcrawling.domain.Product;
 import com.sinse.javawebcrawling.domain.Review;
+import com.sinse.javawebcrawling.util.FinalUrlResolver;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,6 +33,8 @@ public class DetailCrawling {
     @Value("${chrom.driver.path}")
     private String WEB_DRIVER_PATH;
     //웹브라우저를 프로그래밍적으로 제어하는 인터페이스
+
+    private FinalUrlResolver finalUrlResolver;
 
     public Product detailPage(Product product,WebDriver driver) {
         Product item = product;
@@ -253,7 +257,9 @@ public class DetailCrawling {
             Element link = element.selectFirst("a.link__full-cover[href]");
             if (link != null) {
                 //구매 링크 사이트 저장
-                price.setShopLink(link.attr("abs:href"));
+                String url = link.attr("href");
+                String shopLink = finalUrlResolver.resolveUrl(url);
+                price.setShopLink(shopLink);
             }
             prices.add(price);
         }
