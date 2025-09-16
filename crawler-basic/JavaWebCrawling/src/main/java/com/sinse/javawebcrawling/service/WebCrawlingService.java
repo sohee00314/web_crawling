@@ -285,6 +285,9 @@ public class WebCrawlingService {
     }
 
     public boolean checkProductName(String productName) {
+        //제외시킬 키워드 배열
+        String[] excludeKeywords = {"키트", "세트"};
+
         return false;
     }
 
