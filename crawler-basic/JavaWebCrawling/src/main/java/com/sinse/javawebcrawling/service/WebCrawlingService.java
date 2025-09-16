@@ -85,7 +85,6 @@ public class WebCrawlingService {
 
             //상품브랜드 메서드 호출
             brand = getBrand(productName);
-            log.debug("상품명 : {}, 브랜드 {}", productName, brand);
 
             //용량과 구성이 있는 Map 호출
             Map<String,String> map = usedName(productName);
