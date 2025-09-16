@@ -312,4 +312,9 @@ public class WebCrawlingService {
         return false;
     }
 
+    public String getBrand(String productName) {
+        String brand = null;
+        return  brand;
+    }
+
 }
