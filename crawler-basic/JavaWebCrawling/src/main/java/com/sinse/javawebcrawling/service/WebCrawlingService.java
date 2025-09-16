@@ -218,7 +218,7 @@ public class WebCrawlingService {
                 if (packaging.isEmpty()) packaging = null;
             }
 
-            // 도수: "도수: 6도" / "도수: 16%" 등 변형 대응 (숫자만 뽑기)
+            // 도수: "도수: 6도" / "도수: 16%" 등 변형 대응
             Matcher alcM = Pattern.compile("도수\\s*[:：]?\\s*([0-9]{1,3})\\s*[도%]")
                     .matcher(text);
             if (alcM.find()) {
@@ -226,10 +226,13 @@ public class WebCrawlingService {
                 if (alcohol.isEmpty()) alcohol = null;
             }
 
+            //'구성'이 있는데 찾기
             Matcher listM = Pattern.compile("구성\\s*[:：]?\\s*([^\\r\\n]+)").matcher(text);
             if (listM.find()) {
+                //'구성'다음 문자열 추출
                 String tt = listM.group(1).trim();
                 if(alcohol == null){
+                    //추출한 문자열중에 '도','%'찾아서 앞에는는 숫자 추출
                     Pattern p = Pattern.compile("((?:[1-9]?\\d|100)(?:\\.\\d{1,2})?)\\s*[도%]");
                     Matcher m = p.matcher(tt);
 
@@ -241,6 +244,7 @@ public class WebCrawlingService {
                     }
 
                     if (max != Double.NEGATIVE_INFINITY) {
+                        //여러 도수중 제일 큰 도수 적용
                         alcohol = (Math.floor(max) == max) ? Integer.toString((int) max) : Double.toString(max);
                     }
                 }
