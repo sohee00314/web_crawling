@@ -301,14 +301,12 @@ public class WebCrawlingService {
         for (String keyword : excludeKeywords) {
             //제외키워드가 포함되여 있는 여부 확인
             if (productName.contains(keyword)) {
-                log.debug("상품명 {}은 {}를 반견해서 제외됨", productName, keyword);
                 return true;
             }
         }
 
         //숫자+호, (숫자)호 모두 찾기
         if (Pattern.compile("(?:\\(\\d+\\)|\\d+)호").matcher(productName).find()) {
-            log.debug("상품명 {}은 숫자+호 구성으로 되여있어 제외되었습니다", productName);
             return true;
         }
         return false;
