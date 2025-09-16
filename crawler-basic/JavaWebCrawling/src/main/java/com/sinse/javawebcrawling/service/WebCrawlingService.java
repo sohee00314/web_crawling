@@ -298,6 +298,7 @@ public class WebCrawlingService {
 
         //숫자+호, (숫자)호 모두 찾기
         if (Pattern.compile("(?:\\(\\d+\\)|\\d+)호").matcher(productName).find()) {
+            log.debug("상품명 {}은 숫자+호 구성으로 되여있어 제외되었습니다", productName);
             return true;
         }
         return false;
