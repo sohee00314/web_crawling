@@ -135,7 +135,6 @@ public class WebCrawlingService {
                 String v = map2.get("volume");
                 if (v != null) {
                     product.setVolume(Integer.parseInt(v));
-                    log.debug(" 구성 안에 있는 용량 {} ml",Integer.valueOf(v));
                 }
             }
         }
