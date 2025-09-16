@@ -323,6 +323,11 @@ public class WebCrawlingService {
             chackName = next;
         }
 
+        //상품명 중간에 (),[],공백이 있으면 그전까지만 추출
+        Matcher m = Pattern.compile("^([^\\s(\\[]+)").matcher(chackName);
+        if(m.find()){
+            brand = m.group(1);
+        }
         return  brand;
     }
 
