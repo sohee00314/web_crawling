@@ -259,9 +259,12 @@ public class WebCrawlingService {
                     String unit = fullMatch.replaceAll("\\d+(?:\\.\\d+)?\\s*", "").toLowerCase();
 
                     // 리터 단위를 ml로 변환 (1L = 1000ml)
-                    double volumeInMl = v;
+                    int volumeInMl;
                     if (unit.equals("리터") || unit.equals("ℓ") || unit.equals("l")) {
-                        volumeInMl = v * 1000; // 리터를 ml로 변환
+                        v = v * 1000; // 리터를 ml로 변환
+                        volumeInMl= (int) v;
+                    }else {
+                        volumeInMl =(int) v;
                     }
                     volume= String.valueOf(volumeInMl);
                 }
