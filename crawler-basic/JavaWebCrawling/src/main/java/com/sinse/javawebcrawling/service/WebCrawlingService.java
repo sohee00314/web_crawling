@@ -316,7 +316,12 @@ public class WebCrawlingService {
         String brand = null;
         //상품멱에 공백제거
         String chackName = productName.trim();
-
+        //(),[]로 시작할 경우 제거
+        while (true) {
+            String next = chackName.replaceFirst("^\\s*(?:\\([^)]*\\)|\\[[^]]*\\])\\s*", "");
+            if (next.equals(chackName)) break; // 더 이상 제거할 게 없으면 중단
+            chackName = next;
+        }
 
         return  brand;
     }
