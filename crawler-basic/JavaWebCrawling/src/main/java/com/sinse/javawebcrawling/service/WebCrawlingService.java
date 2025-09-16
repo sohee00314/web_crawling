@@ -262,11 +262,12 @@ public class WebCrawlingService {
                     if (unit.equals("리터") || unit.equals("ℓ") || unit.equals("l")) {
                         volumeInMl = v * 1000; // 리터를 ml로 변환
                     }
-                    result.put("volume", String.valueOf(volumeInMl));
+                    volume= String.valueOf(volumeInMl);
                 }
             }
         }
 
+        result.put("volume", volume);
         result.put("packaging",packaging);
         result.put("alcohol",alcohol);
         return result;
