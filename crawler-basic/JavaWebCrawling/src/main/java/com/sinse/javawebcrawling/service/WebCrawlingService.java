@@ -152,6 +152,9 @@ public class WebCrawlingService {
 
         // Product 객체 설정
         product.setProductName(productName);
+        if(brand != null){
+            product.setBrand(brand);
+        }
         product.setCode(code);
         product.setImageUrl(imageUrl);
         product.setDetailLink(detailLink);
