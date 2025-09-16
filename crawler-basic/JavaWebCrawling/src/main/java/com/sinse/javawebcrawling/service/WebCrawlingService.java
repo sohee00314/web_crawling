@@ -77,6 +77,11 @@ public class WebCrawlingService {
         if (titleElement != null) {
             productName = titleElement.text().trim();
 
+            //상품명 검사 추가
+            if(checkProductName(productName)){
+                return null;
+            }
+
             //용량과 구성이 있는 Map 호출
             Map<String,String> map = usedName(productName);
             if (map != null) {
