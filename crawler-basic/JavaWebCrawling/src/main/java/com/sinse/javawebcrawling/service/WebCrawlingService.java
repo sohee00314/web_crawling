@@ -132,7 +132,7 @@ public class WebCrawlingService {
                 product.setAlcohol(Double.parseDouble(alcohol));
             }
             if(volume== null){
-                String v = map2.get("vloume");
+                String v = map2.get("volume");
                 if (v != null) {
                     product.setVolume(Integer.parseInt(v));
                     log.debug(" 구성 안에 있는 용량 {} ml",Integer.valueOf(v));
@@ -202,7 +202,6 @@ public class WebCrawlingService {
     public Map<String,String> isMap(Element container) {
         Map<String,String> result = new HashMap<>();
 
-        // 기본값: 못 찾으면 null
         String packaging = null;
         String alcohol   = null;
 
@@ -262,7 +261,7 @@ public class WebCrawlingService {
                     if (unit.equals("리터") || unit.equals("ℓ") || unit.equals("l")) {
                         volumeInMl = v * 1000; // 리터를 ml로 변환
                     }
-                    result.put("volum", String.valueOf(volumeInMl));
+                    result.put("volume", String.valueOf(volumeInMl));
                 }
             }
         }
