@@ -284,4 +284,8 @@ public class WebCrawlingService {
         return result;
     }
 
+    public boolean checkProductName(String productName) {
+        return false;
+    }
+
 }
