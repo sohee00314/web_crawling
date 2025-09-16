@@ -284,6 +284,11 @@ public class WebCrawlingService {
         return result;
     }
 
+    /**
+     * 상품명에 제외시킬 키외드 와 숫자+호 구조가 포함되여있는지 확인하는 메서드
+     * @param productName 검사할 상품명
+     * @return 상품명에 조건이 맞으면 false<br> 제외키워드 또는 숫자+호 구조 발견 시 true
+     */
     public boolean checkProductName(String productName) {
         //제외시킬 키워드 배열
         String[] excludeKeywords = {"키트", "세트"};
