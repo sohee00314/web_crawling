@@ -80,6 +80,7 @@ public class WebCrawlingService {
 
             //상품명 검사 추가
             if(checkProductName(productName)){
+                log.debug("크롤링 제외 상품입니다");
                 return null;
             }
 
